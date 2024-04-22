@@ -63,7 +63,6 @@ namespace TicketingSystem.IntegrationTests
         public async Task ShouldUpdateEntityAsync()
         {
             // Arrange
-            _testEntity = CreateEntity();
             await _repository.CreateAsync(_testEntity);
 
             // Act
