@@ -1,9 +1,7 @@
 ﻿namespace TicketingSystem.DataAccess.Entities
 {
-    public class Manifest : IStringKeyEntity
+    public class Manifest : BaseEntity
     {
-        public string Id { get; set; }
-
         public string VenueId { get; set; }
 
         public string Name { get; set; }

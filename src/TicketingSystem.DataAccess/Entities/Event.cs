@@ -3,10 +3,8 @@ using TicketingSystem.DataAccess.Enums;
 
 namespace TicketingSystem.DataAccess.Entities
 {
-    public class Event : IStringKeyEntity
+    public class Event : BaseEntity
     {
-        public string Id { get; set; }
-
         public string Name { get; set; }
 
         public string Description { get; set; }

@@ -2,10 +2,8 @@
 
 namespace TicketingSystem.DataAccess.Entities
 {
-    public class Ticket : IStringKeyEntity
+    public class Ticket : BaseEntity
     {
-        public string Id { get; set; }
-
         public string EventSeatId { get; set; }
 
         public decimal Price { get; set; }

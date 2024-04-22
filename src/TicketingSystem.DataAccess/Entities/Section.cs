@@ -1,9 +1,7 @@
 ﻿namespace TicketingSystem.DataAccess.Entities
 {
-    public class Section : IStringKeyEntity
+    public class Section : BaseEntity
     {
-        public string Id { get; set; }
-
         public string ManifestId { get; set; }
 
         public string Class { get; set; }

@@ -1,0 +1,13 @@
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System;
+
+namespace TicketingSystem.DataAccess.Entities
+{
+    public abstract class BaseEntity : IStringKeyEntity
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.String)]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+    }
+}

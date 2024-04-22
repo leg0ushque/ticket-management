@@ -2,10 +2,8 @@
 
 namespace TicketingSystem.DataAccess.Entities
 {
-    public class User : IStringKeyEntity
+    public class User : BaseEntity
     {
-        public string Id { get; set; }
-
         public string FirstName { get; set; }
 
         public string LastName { get; set; }

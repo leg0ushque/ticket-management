@@ -1,9 +1,7 @@
 ﻿namespace TicketingSystem.DataAccess.Entities
 {
-    public class Row : IStringKeyEntity
+    public class Row : BaseEntity
     {
-        public string Id { get; set; }
-
         public string SectionId { get; set; }
 
         public int Number { get; set; }

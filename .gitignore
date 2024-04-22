@@ -396,3 +396,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+tests/TicketingSystem.IntegrationTests/settings.json
