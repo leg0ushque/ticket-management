@@ -1,13 +1,13 @@
 ﻿namespace TicketingSystem.DataAccess.Entities
 {
-    public class Section : BaseEntity
+    public class EventSection : BaseEntity
     {
-        public string VenueId { get; set; }
+        public string EventId { get; set; }
 
         public string Class { get; set; }
 
         public int Number { get; set; }
 
-        public Row[] Rows { get; set; }
+        public EventRow[] EventRows { get; set; }
     }
 }

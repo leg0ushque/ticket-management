@@ -13,10 +13,8 @@ namespace TicketingSystem.DataAccess.Entities
 
         public DateTimeOffset EndTime { get; set; }
 
-        public string ManifestId { get; set; }
+        public string VenueId { get; set; }
 
         public EventState State { get; set; }
     }
-
-
 }

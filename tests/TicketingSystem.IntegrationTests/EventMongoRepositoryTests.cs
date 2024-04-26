@@ -17,7 +17,6 @@ namespace TicketingSystem.IntegrationTests
         public Event CreateEntity() => _fixture.Build<Event>()
             .With(e => e.Name)
             .With(e => e.Description)
-            .With(e => e.ManifestId)
             .With(e => e.StartTime)
             .With(e => e.EndTime)
             .Create();

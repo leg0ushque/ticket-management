@@ -4,7 +4,7 @@ namespace TicketingSystem.DataAccess.Entities
 {
     public class CartItem : BaseEntity
     {
-        public string UserId { get; set; }
+        public string CartId { get; set; }
 
         public string TicketId { get; set; }
 
