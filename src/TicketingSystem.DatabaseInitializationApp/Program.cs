@@ -93,8 +93,8 @@ namespace TicketingSystem.DatabaseInitializationApp
                     Class = "A", Number = 1,
                     VenueId = venues[0].Id,
                     Rows = [
-                        new Row { Number = 1, SeatNumbers = [ 1, 2, 3, 4, 5 ] },
-                        new Row { Number = 2, SeatNumbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] },
+                        new Row { Number = 1, SeatNumbers = Enumerable.Range(1, 5).ToArray() },
+                        new Row { Number = 2, SeatNumbers = Enumerable.Range(1, 10).ToArray() },
                     ]
                 },
                 new Section {
@@ -102,8 +102,8 @@ namespace TicketingSystem.DatabaseInitializationApp
                     Class = "A", Number = 2,
                     VenueId = venues[0].Id,
                     Rows = [
-                        new Row { Number = 1, SeatNumbers = [ 1, 2, 3, 4, 5 ] },
-                        new Row { Number = 2, SeatNumbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] },
+                        new Row { Number = 1, SeatNumbers = Enumerable.Range(1, 5).ToArray() },
+                        new Row { Number = 2, SeatNumbers = Enumerable.Range(1, 10).ToArray() },
                     ]
                 },
                 new Section {
@@ -111,8 +111,8 @@ namespace TicketingSystem.DatabaseInitializationApp
                     Class = "B", Number = 1,
                     VenueId = venues[0].Id,
                     Rows = [
-                        new Row { Number = 1, SeatNumbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] },
-                        new Row { Number = 2, SeatNumbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,] },
+                        new Row { Number = 1, SeatNumbers = Enumerable.Range(1, 10).ToArray() },
+                        new Row { Number = 2, SeatNumbers = Enumerable.Range(1, 20).ToArray() },
                     ]
                 },
                 new Section {
@@ -120,8 +120,8 @@ namespace TicketingSystem.DatabaseInitializationApp
                     Class = "B", Number = 2,
                     VenueId = venues[0].Id,
                     Rows = [
-                        new Row { Number = 1, SeatNumbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] },
-                        new Row { Number = 2, SeatNumbers = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,] },
+                        new Row { Number = 1, SeatNumbers = Enumerable.Range(1, 10).ToArray() },
+                        new Row { Number = 2, SeatNumbers = Enumerable.Range(1, 20).ToArray() },
                     ]
                 }
             };
