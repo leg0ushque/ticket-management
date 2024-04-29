@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Services;
 
 namespace TicketingSystem.VenuesApi.Controllers
@@ -12,7 +10,6 @@ namespace TicketingSystem.VenuesApi.Controllers
     {
         private readonly IVenueService _venuesService;
         private readonly ISectionService _sectionsService;
-        private readonly ILogger<VenuesController> _logger;
         public VenuesController(
             IVenueService venuesService,
             ISectionService sectionsService,
@@ -20,7 +17,6 @@ namespace TicketingSystem.VenuesApi.Controllers
         {
             _venuesService = venuesService;
             _sectionsService = sectionsService;
-            _logger = logger;
         }
 
         [HttpGet]

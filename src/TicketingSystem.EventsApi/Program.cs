@@ -8,7 +8,7 @@ using System.IO;
 using TicketingSystem.BusinessLogic;
 using TicketingSystem.BusinessLogic.Mapper;
 
-namespace TicketingSystem.VenuesApi
+namespace TicketingSystem.EventsApi
 {
     public static class Program
     {
