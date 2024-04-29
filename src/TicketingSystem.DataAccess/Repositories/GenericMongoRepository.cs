@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.DataAccess.Entities;
@@ -28,6 +29,12 @@ namespace TicketingSystem.DataAccess.Repositories
         {
             return await _collection.Find(Builders<TEntity>.Filter.Eq("_id",id))
                 .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<List<TEntity>> FilterAsync(Expression<Func<TEntity, bool>> expression, CancellationToken cancellationToken = default)
+        {
+            return await _collection.Find(Builders<TEntity>.Filter.Where(expression))
+                .ToListAsync(cancellationToken);
         }
 
         public async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default)

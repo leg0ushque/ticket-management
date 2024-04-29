@@ -1,23 +1,16 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using TicketingSystem.BusinessLogic.Dtos;
-using TicketingSystem.DataAccess.Entities;
-using TicketingSystem.DataAccess.Repositories;
+﻿using TicketingSystem.BusinessLogic.Dtos;
+using TicketingSystem.BusinessLogic.Exceptions;
 
 namespace TicketingSystem.BusinessLogic.Validators
 {
     public class EventValidator : IValidator<EventDto>
     {
-        private readonly IMongoRepository<Event> _repository;
-
-        public EventValidator(IMongoRepository<Event> repository)
+        public void Validate(EventDto entity)
         {
-            _repository = repository;
-        }
-
-        public Task Validate(EventDto entity, CancellationToken cancellationToken = default)
-        {
-            return;
+            if (entity.StartTime > entity.EndTime)
+            {
+                throw new BusinessLogicException("Start time must be before the end time");
+            }
         }
     }
 }
