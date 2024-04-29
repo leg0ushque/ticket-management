@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
@@ -11,7 +12,7 @@ using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
-    public class GenericEntityService<TEntity, TEntityDto> : IService<TEntityDto>
+    public class GenericEntityService<TEntity, TEntityDto> : IService<TEntity, TEntityDto>
         where TEntity : class, IHasId
         where TEntityDto : class, IDto
     {
@@ -19,9 +20,8 @@ namespace TicketingSystem.BusinessLogic.Services
         private protected readonly IMongoRepository<TEntity> _repository;
         private protected readonly IMapper _mapper;
 
-        public GenericEntityService(IValidator<TEntityDto> validator, IMongoRepository<TEntity> repository, IMapper mapper)
+        public GenericEntityService(IMongoRepository<TEntity> repository, IMapper mapper)
         {
-            _validator = validator;
             _repository = repository;
             _mapper = mapper;
         }
@@ -34,8 +34,7 @@ namespace TicketingSystem.BusinessLogic.Services
         public async Task<IReadOnlyCollection<TEntityDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return _mapper.Map<List<TEntityDto>>(
-                    await _repository.GetAllAsync(cancellationToken))
-                .AsReadOnly();
+                    await _repository.GetAllAsync(cancellationToken));
         }
 
         public async Task<TEntityDto> GetById(string entityId, CancellationToken cancellationToken = default)
@@ -75,6 +74,14 @@ namespace TicketingSystem.BusinessLogic.Services
             {
                 throw new BusinessLogicException($"There is no {nameof(TEntity)} found by Id='{entityId}' to delete.");
             }
+        }
+
+        public async Task<IReadOnlyCollection<TEntityDto>> FilterAsync(Expression<Func<TEntity, bool>> expression,
+            CancellationToken cancellationToken = default)
+        {
+            return _mapper.Map<List<TEntityDto>>(
+                    await _repository.FilterAsync(expression, cancellationToken))
+                .AsReadOnly();
         }
     }
 }

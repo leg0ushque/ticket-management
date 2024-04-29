@@ -1,0 +1,6 @@
+{
+  "ConnectionStrings": {
+    "connectionString": "<connection string here>"
+  },
+  "databaseName": "TicketingSystemDb"
+}

@@ -34,16 +34,15 @@ namespace TicketingSystem.BusinessLogic
         private static IServiceCollection RegisterServices(this IServiceCollection services)
         {
             return services
-                .AddTransient<IService<CartItemDto>, GenericEntityService<CartItem, CartItemDto>>()
-                .AddTransient<IService<EventDto>, GenericEntityService<Event, EventDto>>()
-                .AddTransient<IService<EventSectionDto>, GenericEntityService<EventSection, EventSectionDto>>()
-                .AddTransient<IService<EventSeatDto>, GenericEntityService<EventSeat, EventSeatDto>>()
-                .AddTransient<IService<PaymentDto>, GenericEntityService<Payment, PaymentDto>>()
-                .AddTransient<IService<EventSeatDto>, GenericEntityService<EventSeat, EventSeatDto>>()
-                .AddTransient<IService<SectionDto>, GenericEntityService<Section, SectionDto>>()
-                .AddTransient<IService<TicketDto>, GenericEntityService<Ticket, TicketDto>>()
-                .AddTransient<IService<UserDto>, GenericEntityService<User, UserDto>>()
-                .AddTransient<IService<VenueDto>, GenericEntityService<Venue, VenueDto>>();
+                .AddTransient<ICartItemService, CartItemService>()
+                .AddTransient<IEventService, EventService>()
+                .AddTransient<IEventSectionService, EventSectionService>()
+                .AddTransient<IEventSeatService, EventSeatService>()
+                .AddTransient<IPaymentService, PaymentService>()
+                .AddTransient<ISectionService, SectionService>()
+                .AddTransient<ITicketService, TicketService>()
+                .AddTransient<IUserService, UserService>()
+                .AddTransient<IVenueService, VenueService>();
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Exceptions;
 
