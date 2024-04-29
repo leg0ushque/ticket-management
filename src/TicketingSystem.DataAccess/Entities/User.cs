@@ -12,10 +12,4 @@ namespace TicketingSystem.DataAccess.Entities
 
         public UserRole Role { get; set; }
     }
-    public class Payment : BaseEntity
-    {
-        public string[] CartItemIds { get; set; }
-
-        public PaymentState State { get; set; }
-    }
 }

@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "TicketingSystem.IntegrationTests": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ENVIRONMENT": "dev"
+      },
+      "remoteDebugEnabled": true
+    }
+  }
+}

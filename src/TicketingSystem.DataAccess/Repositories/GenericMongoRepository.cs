@@ -9,7 +9,7 @@ using TicketingSystem.DataAccess.Entities;
 namespace TicketingSystem.DataAccess.Repositories
 {
     public class GenericMongoRepository<TEntity> : IMongoRepository<TEntity>
-        where TEntity : IStringKeyEntity
+        where TEntity : IHasId
     {
         private readonly IMongoCollection<TEntity> _collection;
 

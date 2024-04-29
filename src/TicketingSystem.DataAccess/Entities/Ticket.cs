@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+using System;
 using TicketingSystem.DataAccess.Enums;
 
 namespace TicketingSystem.DataAccess.Entities
@@ -11,11 +13,12 @@ namespace TicketingSystem.DataAccess.Entities
 
         public TicketState State { get; set; }
 
-        public string PriceOptionId { get; set; }
+        public PriceOption PriceOption { get; set; }
 
         public decimal Price { get; set; }
 
-        public DateTime PurchasedOn { get; set; }
+        [BsonRepresentation(BsonType.DateTime)]
+        public DateTimeOffset PurchasedOn { get; set; }
 
         public string UserId { get; set; }
     }

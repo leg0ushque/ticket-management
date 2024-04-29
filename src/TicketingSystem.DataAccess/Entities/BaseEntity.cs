@@ -4,7 +4,7 @@ using System;
 
 namespace TicketingSystem.DataAccess.Entities
 {
-    public abstract class BaseEntity : IStringKeyEntity
+    public abstract class BaseEntity : IHasId
     {
         [BsonId]
         [BsonRepresentation(BsonType.String)]

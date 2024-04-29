@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using System;
 using System.IO;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
@@ -12,9 +13,10 @@ namespace TicketingSystem.IntegrationTests
 
         public DatabaseFixture()
         {
+            var env = Environment.GetEnvironmentVariable("ENVIRONMENT") ?? throw new ArgumentException("ENV VAR");
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("settings.json")
+                .AddJsonFile($"settings.{env}.json")
                 .Build();
 
             var connectionString = config.GetConnectionString("connectionString");
