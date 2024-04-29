@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TicketingSystem.DatabaseInitializationApp": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ENVIRONMENT": "dev"
+      }
+    }
+  }
+}
