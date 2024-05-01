@@ -4,14 +4,18 @@ namespace TicketingSystem.EventsApi.Models
 {
     public class EventSeatInfoModel
     {
-        public string SectionId { get; set; }
+        public string EventSectionId { get; set; }
 
-        public string RowId { get; set; }
+        public string EventSectionClass { get; set; }
 
-        public string SeatId { get; set; }
+        public int EventSectionNumber { get; set; }
 
-        public EventSeatState State { get; set; }
+        public int EventRowNumber { get; set; }
 
-        public PriceOption PriceOption { get; set; }
+        public decimal EventRowPrice { get; set; }
+
+        public int EventSeatNumber { get; set; }
+
+        public EventSeatState EventSeatState { get; set; }
     }
 }

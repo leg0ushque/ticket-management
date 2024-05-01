@@ -1,58 +1,74 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.DataAccess.Entities;
+using TicketingSystem.DataAccess.Factories;
 
 namespace TicketingSystem.DataAccess.Repositories
 {
-    public class GenericMongoRepository<TEntity> : IMongoRepository<TEntity>
-        where TEntity : IHasId
+    public abstract class GenericMongoRepository<TEntity> : IMongoRepository<TEntity>
+        where TEntity : class, IHasId
     {
+        public abstract string _collectionName { get; }
+
         private readonly IMongoCollection<TEntity> _collection;
 
-        public GenericMongoRepository(IMongoDatabase database, string collectionName)
+        protected GenericMongoRepository(IMongoDbFactory mongoDbFactory)
         {
-            _collection = database.GetCollection<TEntity>(collectionName);
+            _collection = mongoDbFactory.GetCollection<TEntity>(_collectionName);
         }
 
         public async Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _collection.Find(new BsonDocument())
-                .ToListAsync(cancellationToken);
+            var items = await _collection.FindAsync(_ => true,
+                cancellationToken: cancellationToken);
+
+            return await items.ToListAsync(cancellationToken);
         }
 
         public async Task<TEntity> GetByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            return await _collection.Find(Builders<TEntity>.Filter.Eq("_id",id))
-                .FirstOrDefaultAsync(cancellationToken);
+            var item = await _collection.FindAsync(Builders<TEntity>.Filter.Eq("_id", id),
+                cancellationToken: cancellationToken);
+
+            return await item.FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<List<TEntity>> FilterAsync(Expression<Func<TEntity, bool>> expression, CancellationToken cancellationToken = default)
         {
-            return await _collection.Find(Builders<TEntity>.Filter.Where(expression))
-                .ToListAsync(cancellationToken);
+            var items = await _collection.FindAsync(Builders<TEntity>.Filter.Where(expression),
+                cancellationToken: cancellationToken);
+
+            return await items.ToListAsync(cancellationToken);
         }
 
-        public async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
+        public async Task<List<TEntity>> FilterAsync<TField>(Expression<Func<TEntity, TField>> field, IEnumerable<TField> values, CancellationToken cancellationToken = default)
+        {
+            var items = await _collection.FindAsync(Builders<TEntity>.Filter.In(field, values),
+                cancellationToken: cancellationToken);
+
+            return await items.ToListAsync(cancellationToken);
+        }
+
+        public Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
             entity.Id = Guid.NewGuid().ToString();
 
-            await _collection.InsertOneAsync(entity, new InsertOneOptions(), cancellationToken);
+            return _collection.InsertOneAsync(entity, new InsertOneOptions(), cancellationToken);
         }
 
-        public async Task UpdateAsync(string id, TEntity entity, CancellationToken cancellationToken = default)
+        public Task UpdateAsync(string id, TEntity entity, CancellationToken cancellationToken = default)
         {
-            await _collection.ReplaceOneAsync(Builders<TEntity>.Filter.Eq("_id", id), entity,
+            return _collection.ReplaceOneAsync(Builders<TEntity>.Filter.Eq("_id", id), entity,
                 cancellationToken: cancellationToken);
         }
 
-        public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
+        public Task DeleteAsync(string id, CancellationToken cancellationToken = default)
         {
-            await _collection.DeleteOneAsync(Builders<TEntity>.Filter.Eq("_id", id), cancellationToken);
+            return _collection.DeleteOneAsync(Builders<TEntity>.Filter.Eq("_id", id), cancellationToken);
         }
     }
 }

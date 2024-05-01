@@ -7,7 +7,6 @@ namespace TicketingSystem.DataAccess.Entities
     public abstract class BaseEntity : IHasId
     {
         [BsonId]
-        [BsonRepresentation(BsonType.String)]
         public string Id { get; set; } = Guid.NewGuid().ToString();
     }
 }

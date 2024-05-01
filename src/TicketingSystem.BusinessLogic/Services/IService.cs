@@ -16,13 +16,16 @@ namespace TicketingSystem.BusinessLogic.Services
 
         Task<IReadOnlyCollection<TEntityDto>> GetAllAsync(CancellationToken cancellationToken = default);
 
-        Task<TEntityDto> GetById(string entityId, CancellationToken cancellationToken = default);
+        Task<TEntityDto> GetByIdAsync(string entityId, CancellationToken cancellationToken = default);
 
         Task UpdateAsync(TEntityDto entity, CancellationToken cancellationToken = default);
 
         Task DeleteAsync(string entityId, CancellationToken cancellationToken = default);
 
         Task<IReadOnlyCollection<TEntityDto>> FilterAsync(Expression<Func<TEntity, bool>> expression,
+            CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyCollection<TEntityDto>> FilterAsync<TField>(Expression<Func<TEntity, TField>> field, IEnumerable<TField> values,
             CancellationToken cancellationToken = default);
     }
 }

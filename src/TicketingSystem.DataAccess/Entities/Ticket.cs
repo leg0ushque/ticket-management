@@ -18,7 +18,7 @@ namespace TicketingSystem.DataAccess.Entities
         public decimal Price { get; set; }
 
         [BsonRepresentation(BsonType.DateTime)]
-        public DateTimeOffset PurchasedOn { get; set; }
+        public DateTimeOffset? PurchasedOn { get; set; }
 
         public string UserId { get; set; }
     }

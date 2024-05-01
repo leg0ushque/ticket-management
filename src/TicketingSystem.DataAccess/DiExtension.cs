@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
+using TicketingSystem.DataAccess.Entities;
+using TicketingSystem.DataAccess.Factories;
 using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.DataAccess
@@ -8,12 +9,17 @@ namespace TicketingSystem.DataAccess
     {
         public static IServiceCollection AddDataAccessServices(this IServiceCollection services, string connectionString, string databaseName)
         {
-            var client = new MongoClient(connectionString);
-            var database = client.GetDatabase(databaseName);
-
             return services
-                .AddSingleton<IMongoDatabase>(database)
-                .AddScoped(typeof(IMongoRepository<>), typeof(GenericMongoRepository<>));
+                .AddSingleton<IMongoDbFactory>(new MongoDbFactory(connectionString, databaseName))
+                .AddTransient<IMongoRepository<CartItem>, CartItemRepository>()
+                .AddTransient<IMongoRepository<Event>, EventRepository>()
+                .AddTransient<IMongoRepository<EventSeat>, EventSeatRepository>()
+                .AddTransient<IMongoRepository<EventSection>, EventSectionRepository>()
+                .AddTransient<IMongoRepository<Payment>, PaymentRepository>()
+                .AddTransient<IMongoRepository<Ticket>, TicketRepository>()
+                .AddTransient<IMongoRepository<User>, UserRepository>()
+                .AddTransient<IMongoRepository<Venue>, VenueRepository>()
+                .AddTransient<IMongoRepository<Section>, SectionRepository>();
         }
     }
 }

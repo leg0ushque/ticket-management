@@ -6,17 +6,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Exceptions;
-using TicketingSystem.BusinessLogic.Validators;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
-    public class GenericEntityService<TEntity, TEntityDto> : IService<TEntity, TEntityDto>
+    public class GenericEntityService<TEntity, TEntityDto>
         where TEntity : class, IHasId
         where TEntityDto : class, IDto
     {
-        private protected readonly IValidator<TEntityDto> _validator;
         private protected readonly IMongoRepository<TEntity> _repository;
         private protected readonly IMapper _mapper;
 
@@ -37,7 +35,7 @@ namespace TicketingSystem.BusinessLogic.Services
                     await _repository.GetAllAsync(cancellationToken));
         }
 
-        public async Task<TEntityDto> GetById(string entityId, CancellationToken cancellationToken = default)
+        public async Task<TEntityDto> GetByIdAsync(string entityId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -81,6 +79,12 @@ namespace TicketingSystem.BusinessLogic.Services
         {
             return _mapper.Map<List<TEntityDto>>(
                     await _repository.FilterAsync(expression, cancellationToken))
+                .AsReadOnly();
+        }
+
+        public async Task<IReadOnlyCollection<TEntityDto>> FilterAsync<TField>(Expression<Func<TEntity, TField>> field, IEnumerable<TField> values, CancellationToken cancellationToken = default)
+        {
+            return _mapper.Map<List<TEntityDto>>(await _repository.FilterAsync(field, values, cancellationToken))
                 .AsReadOnly();
         }
     }

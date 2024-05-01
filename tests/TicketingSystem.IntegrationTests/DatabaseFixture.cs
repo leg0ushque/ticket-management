@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using System;
 using System.IO;
 using TicketingSystem.DataAccess.Entities;
+using TicketingSystem.DataAccess.Factories;
 using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.IntegrationTests
@@ -22,10 +23,9 @@ namespace TicketingSystem.IntegrationTests
             var connectionString = config.GetConnectionString("connectionString");
             var databaseName = config.GetSection("databaseName").Value;
 
-            var client = new MongoClient(connectionString);
-            var database = client.GetDatabase(databaseName);
+            var mongoDbFactory = new MongoDbFactory(connectionString, databaseName);
 
-            EventRepositoryInstance = new GenericMongoRepository<Event>(database, "Events");
+            EventRepositoryInstance = new EventRepository(mongoDbFactory);
         }
     }
 }

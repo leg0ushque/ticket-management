@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Enums;
+using TicketingSystem.DataAccess.Factories;
 using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.DatabaseInitializationApp
@@ -24,17 +25,16 @@ namespace TicketingSystem.DatabaseInitializationApp
             var connectionString = config.GetConnectionString("connectionString");
             var databaseName = config.GetSection("databaseName").Value;
 
-            var client = new MongoClient(connectionString);
-            var database = client.GetDatabase(databaseName);
+            var factory = new MongoDbFactory(connectionString, databaseName);
 
-            IMongoRepository<CartItem> cartItemRepository = new GenericMongoRepository<CartItem>(database, "CartItems");
-            IMongoRepository<Event> eventRepository = new GenericMongoRepository<Event>(database, "Events");
-            IMongoRepository<EventSeat> eventSeatRepository = new GenericMongoRepository<EventSeat>(database, "EventSeats");
-            IMongoRepository<EventSection> eventSectionRepository = new GenericMongoRepository<EventSection>(database, "EventSections");
-            IMongoRepository<Section> sectionRepository = new GenericMongoRepository<Section>(database, "Sections");
-            IMongoRepository<Ticket> ticketRepository = new GenericMongoRepository<Ticket>(database, "Tickets");
-            IMongoRepository<User> userRepository = new GenericMongoRepository<User>(database, "Users");
-            IMongoRepository<Venue> venueRepository = new GenericMongoRepository<Venue>(database, "Venues");
+            IMongoRepository<CartItem> cartItemRepository = new CartItemRepository(factory);
+            IMongoRepository<Event> eventRepository = new EventRepository(factory);
+            IMongoRepository<EventSeat> eventSeatRepository = new EventSeatRepository(factory);
+            IMongoRepository<EventSection> eventSectionRepository = new EventSectionRepository(factory);
+            IMongoRepository<Section> sectionRepository = new SectionRepository(factory);
+            IMongoRepository<Ticket> ticketRepository = new TicketRepository(factory);
+            IMongoRepository<User> userRepository = new UserRepository(factory);
+            IMongoRepository<Venue> venueRepository = new VenueRepository(factory);
 
             await InitializeDatabase(
                 cartItemRepository,
@@ -69,12 +69,15 @@ namespace TicketingSystem.DatabaseInitializationApp
                     Phone = "123-456-789"
                 }
             };
+            await CreateEntities(venueRepository, venues);
 
             var users = new List<User>
             {
                 new() { Id = Guid.NewGuid().ToString(), Email = "ipetrov@tickets.by", FirstName = "Ivan", LastName = "Petrov", Role = UserRole.User },
                 new() { Id = Guid.NewGuid().ToString(), Email = "adm1@tickets.by", FirstName = "Alex", LastName = "Adminov", Role = UserRole.Admin }
             };
+
+            await CreateEntities(userRepository, users);
 
             var sections = new List<Section>
             {
@@ -116,10 +119,11 @@ namespace TicketingSystem.DatabaseInitializationApp
                 }
             };
 
+            await CreateEntities(sectionRepository, sections);
+
             var events = new List<Event>
             {
                 new() {
-                    Id = Guid.NewGuid().ToString(),
                     Name = "Amazing Match 2024",
                     Description = "You have never seen anything more marvelous than this!",
                     StartTime = dtNow.AddDays(3),
@@ -128,6 +132,8 @@ namespace TicketingSystem.DatabaseInitializationApp
                     VenueId = venues[0].Id,
                 }
             };
+
+            await CreateEntities(eventRepository, events);
 
             var firstSection = sections[0];
             var firstRow = firstSection.Rows[0];
@@ -152,12 +158,18 @@ namespace TicketingSystem.DatabaseInitializationApp
                 .ToArray();
 
             var eventSeats = new List<EventSeat>(firstEventSeats);
+
+            eventSeats[0].State = EventSeatState.Booked;
+            eventSeats[1].State = EventSeatState.Booked;
+            eventSeats[2].State = EventSeatState.Sold;
+
             eventSeats.AddRange(secondEventSeats);
+
+            await CreateEntities(eventSeatRepository, eventSeats);
 
             var eventSections = new List<EventSection>
             {
                 new() {
-                    Id = Guid.NewGuid().ToString(),
                     Class = firstSection.Class, Number = firstSection.Number,
                     EventId = events[0].Id,
                     EventRows = [
@@ -170,7 +182,6 @@ namespace TicketingSystem.DatabaseInitializationApp
                     ]
                 },
                 new() {
-                    Id = Guid.NewGuid().ToString(),
                     Class = secondSection.Class, Number = secondSection.Number,
                     EventId = events[0].Id,
                     EventRows = [
@@ -184,26 +195,24 @@ namespace TicketingSystem.DatabaseInitializationApp
                 },
             };
 
-            var cartId = Guid.NewGuid().ToString();
+            await CreateEntities(eventSectionRepository, eventSections);
 
-            eventSeats[0].State = EventSeatState.Booked;
-            eventSeats[1].State = EventSeatState.Booked;
+            var cartId = Guid.NewGuid().ToString();
 
             var cartItems = new List<CartItem>
             {
-                new() { Id = Guid.NewGuid().ToString(), CartId = cartId, CreatedOn = dtNow.AddDays(-1), EventSeatId = eventSeats[0].Id },
-                new() { Id = Guid.NewGuid().ToString(), CartId = cartId, CreatedOn = dtNow.AddDays(-1), EventSeatId = eventSeats[1].Id }
+                new() { CartId = cartId, CreatedOn = dtNow.AddDays(-1), EventSeatId = eventSeats[0].Id },
+                new() { CartId = cartId, CreatedOn = dtNow.AddDays(-1), EventSeatId = eventSeats[1].Id }
             };
 
-            eventSeats[2].State = EventSeatState.Sold;
+            await CreateEntities(cartItemRepository, cartItems);
 
             var tickets = new List<Ticket>
             {
                 new() {
-                    Id = Guid.NewGuid().ToString(),
                     EventId = events[0].Id,
                     EventSeatId = eventSeats[2].Id,
-                    Price = 6m,                         // Base 12 * 0.5 (child)
+                    Price = 6m,
                     PriceOption = PriceOption.Child,
                     PurchasedOn = dtNow.AddDays(-2),
                     State = TicketState.Purchased,
@@ -211,27 +220,13 @@ namespace TicketingSystem.DatabaseInitializationApp
                 }
             };
 
-            await CreateEntities(eventRepository, events);
-
-            await CreateEntities(eventSeatRepository, eventSeats);
-
-            await CreateEntities(cartItemRepository, cartItems);
-
-            await CreateEntities(eventSectionRepository, eventSections);
-
-            await CreateEntities(sectionRepository, sections);
-
             await CreateEntities(ticketRepository, tickets);
-
-            await CreateEntities(userRepository, users);
-
-            await CreateEntities(venueRepository, venues);
 
             Console.WriteLine("Done. Press ENTER...");
             Console.ReadLine();
         }
 
-        private static async Task CreateEntities<TEntity>(IRepository<TEntity, string> repository, IList<TEntity> entities)
+        private static async Task CreateEntities<TEntity>(IRepository<TEntity> repository, IList<TEntity> entities)
             where TEntity : IHasId
         {
             foreach (var entity in entities)
@@ -239,7 +234,7 @@ namespace TicketingSystem.DatabaseInitializationApp
                 await repository.CreateAsync(entity);
             }
 
-            Console.WriteLine($"{nameof(TEntity)}s created...");
+            Console.WriteLine($"{typeof(TEntity)}s created...");
         }
     }
 }

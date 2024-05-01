@@ -6,6 +6,8 @@ namespace TicketingSystem.BusinessLogic.Dtos
     {
         public string Id { get; set; }
 
+        public string CartId { get; set; }
+
         public string[] CartItemIds { get; set; }
 
         public PaymentState State { get; set; }

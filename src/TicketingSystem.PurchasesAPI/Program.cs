@@ -10,7 +10,7 @@ using System.Reflection;
 using TicketingSystem.BusinessLogic;
 using TicketingSystem.BusinessLogic.Mapper;
 
-namespace TicketingSystem.EventsApi
+namespace TicketingSystem.PurchasesApi
 {
     public static class Program
     {

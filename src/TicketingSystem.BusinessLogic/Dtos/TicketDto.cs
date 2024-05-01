@@ -17,7 +17,7 @@ namespace TicketingSystem.BusinessLogic.Dtos
 
         public decimal Price { get; set; }
 
-        public DateTimeOffset PurchasedOn { get; set; }
+        public DateTimeOffset? PurchasedOn { get; set; }
 
         public string UserId { get; set; }
     }
