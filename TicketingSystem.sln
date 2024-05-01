@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicketingSystem.EventsApi",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketingSystem.PurchasesApi", "src\TicketingSystem.PurchasesAPI\TicketingSystem.PurchasesApi.csproj", "{585D9F4D-72A2-4220-AD41-5F36160FF216}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketingSystem.PaymentsApi", "src\TicketingSystem.PaymentsApi\TicketingSystem.PaymentsApi.csproj", "{C44919D8-EA3D-4A51-B4A9-8E6EC2C698C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{585D9F4D-72A2-4220-AD41-5F36160FF216}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{585D9F4D-72A2-4220-AD41-5F36160FF216}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{585D9F4D-72A2-4220-AD41-5F36160FF216}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C44919D8-EA3D-4A51-B4A9-8E6EC2C698C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C44919D8-EA3D-4A51-B4A9-8E6EC2C698C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C44919D8-EA3D-4A51-B4A9-8E6EC2C698C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C44919D8-EA3D-4A51-B4A9-8E6EC2C698C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +72,7 @@ Global
 		{03F3896B-2D01-4A01-8A07-CDAD9592E375} = {BA02C2E5-C563-4C2F-A1BC-B984AC5D9C61}
 		{553913DB-FA61-42F1-9FE9-5E6483FA8BC0} = {BA02C2E5-C563-4C2F-A1BC-B984AC5D9C61}
 		{585D9F4D-72A2-4220-AD41-5F36160FF216} = {BA02C2E5-C563-4C2F-A1BC-B984AC5D9C61}
+		{C44919D8-EA3D-4A51-B4A9-8E6EC2C698C3} = {BA02C2E5-C563-4C2F-A1BC-B984AC5D9C61}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BA25D757-FE46-4CD8-B21A-55398E61E628}

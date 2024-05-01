@@ -10,6 +10,9 @@ namespace TicketingSystem.DataAccess.Repositories
     public interface IMongoRepository<TEntity> : IRepository<TEntity>
         where TEntity : IHasId
     {
+        public Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue,
+            CancellationToken cancellationToken = default);
+
         public Task<List<TEntity>> FilterAsync(Expression<Func<TEntity, bool>> expression,
             CancellationToken cancellationToken = default);
 

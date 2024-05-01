@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Enums;
@@ -81,9 +82,9 @@ namespace TicketingSystem.PurchasesApi.Controllers
         }
 
         /// <summary>
-        /// Adds a seat to the cart
+        /// Adds a seat to the cart. Returns Aacart state (with total amount)
         /// </summary>
-        /// <returns>A cart state (with total amount)</returns>
+        /// <returns></returns>
         [HttpDelete]
         [Route("carts/{cartId}/events/{eventId}/seats/{seatId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -103,6 +104,29 @@ namespace TicketingSystem.PurchasesApi.Controllers
             }
 
             return await DeleteSeatFromCart(seatId, cartId);
+        }
+
+        /// <summary>
+        /// Moves all the seats in the cart to a booked state. Returns the ID of the related Payment
+        /// </summary>
+        [HttpPut]
+        [Route("carts/{cartId}/book")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> BookSeatsInCart([FromRoute] string cartId)
+        {
+            var seats = (await _cartItemService.FilterAsync(s => s.CartId == cartId))?.Select(ci => ci.EventSeatId).ToList();
+
+            await _eventSeatService.UpdateEventSeatsStates(seats ?? Enumerable.Empty<string>().ToList(), EventSeatState.Booked);
+
+            var paymentsOfCart = await _paymentService.FilterAsync(p => p.CartId == cartId);
+            var payment = paymentsOfCart?.FirstOrDefault();
+
+            if (paymentsOfCart == null || payment == null)
+            {
+                return NotFound(nameof(paymentsOfCart)); // TODO Verify that payment is created during other transactions
+            }
+
+            return Ok(payment.Id);
         }
 
         private async Task<SeatStateModel> AddSeatToCart(AddCartModel model, string cartId)

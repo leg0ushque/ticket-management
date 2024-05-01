@@ -20,6 +20,9 @@ namespace TicketingSystem.BusinessLogic.Services
 
         Task UpdateAsync(TEntityDto entity, CancellationToken cancellationToken = default);
 
+        Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue,
+            CancellationToken cancellationToken = default);
+
         Task DeleteAsync(string entityId, CancellationToken cancellationToken = default);
 
         Task<IReadOnlyCollection<TEntityDto>> FilterAsync(Expression<Func<TEntity, bool>> expression,

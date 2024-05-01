@@ -1,0 +1,6 @@
+{
+  "ConnectionStrings": {
+    "connectionString": "mongodb+srv://t1ckets4dm:va2ehglAG%40%23EECV%26@ticketing-system.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000"
+  },
+  "databaseName": "TicketingSystemDb"
+}

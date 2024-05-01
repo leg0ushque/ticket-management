@@ -35,6 +35,7 @@ namespace TicketingSystem.DatabaseInitializationApp
             IMongoRepository<Ticket> ticketRepository = new TicketRepository(factory);
             IMongoRepository<User> userRepository = new UserRepository(factory);
             IMongoRepository<Venue> venueRepository = new VenueRepository(factory);
+            IMongoRepository<Payment> paymentRepository = new PaymentRepository(factory);
 
             await InitializeDatabase(
                 cartItemRepository,
@@ -44,7 +45,8 @@ namespace TicketingSystem.DatabaseInitializationApp
                 sectionRepository,
                 ticketRepository,
                 userRepository,
-                venueRepository);
+                venueRepository,
+                paymentRepository);
         }
 
         private static async Task InitializeDatabase(
@@ -55,7 +57,8 @@ namespace TicketingSystem.DatabaseInitializationApp
             IMongoRepository<Section> sectionRepository,
             IMongoRepository<Ticket> ticketRepository,
             IMongoRepository<User> userRepository,
-            IMongoRepository<Venue> venueRepository)
+            IMongoRepository<Venue> venueRepository,
+            IMongoRepository<Payment> paymentRepository)
         {
             var dtNow = DateTime.Now;
 
@@ -202,10 +205,18 @@ namespace TicketingSystem.DatabaseInitializationApp
             var cartItems = new List<CartItem>
             {
                 new() { CartId = cartId, CreatedOn = dtNow.AddDays(-1), EventSeatId = eventSeats[0].Id },
-                new() { CartId = cartId, CreatedOn = dtNow.AddDays(-1), EventSeatId = eventSeats[1].Id }
+                new() { CartId = cartId, CreatedOn = dtNow.AddDays(-1), EventSeatId = eventSeats[1].Id },
+                new() { CartId = cartId, CreatedOn = dtNow.AddDays(-1), EventSeatId = eventSeats[3].Id },
             };
 
             await CreateEntities(cartItemRepository, cartItems);
+
+            var payments = new List<Payment>
+            {
+                new() { CartId = cartId, CartItemIds = [ cartItems[0].Id, cartItems[1].Id, cartItems[2].Id ] },
+            };
+
+            await CreateEntities(paymentRepository, payments);
 
             var tickets = new List<Ticket>
             {

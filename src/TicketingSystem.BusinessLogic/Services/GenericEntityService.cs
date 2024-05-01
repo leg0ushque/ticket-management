@@ -62,6 +62,11 @@ namespace TicketingSystem.BusinessLogic.Services
             }
         }
 
+        public Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, CancellationToken cancellationToken = default)
+        {
+            return _repository.UpdateAsync(id, field, newValue, cancellationToken);
+        }
+
         public Task DeleteAsync(string entityId, CancellationToken cancellationToken = default)
         {
             try

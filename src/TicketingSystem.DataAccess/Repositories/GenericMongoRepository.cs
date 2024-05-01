@@ -14,7 +14,7 @@ namespace TicketingSystem.DataAccess.Repositories
     {
         public abstract string _collectionName { get; }
 
-        private readonly IMongoCollection<TEntity> _collection;
+        protected readonly IMongoCollection<TEntity> _collection;
 
         protected GenericMongoRepository(IMongoDbFactory mongoDbFactory)
         {
@@ -63,6 +63,13 @@ namespace TicketingSystem.DataAccess.Repositories
         public Task UpdateAsync(string id, TEntity entity, CancellationToken cancellationToken = default)
         {
             return _collection.ReplaceOneAsync(Builders<TEntity>.Filter.Eq("_id", id), entity,
+                cancellationToken: cancellationToken);
+        }
+
+        public Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, CancellationToken cancellationToken = default)
+        {
+            return _collection.FindOneAndUpdateAsync(Builders<TEntity>.Filter.Eq("_id", id),
+                    Builders<TEntity>.Update.Set(field, newValue),
                 cancellationToken: cancellationToken);
         }
 
