@@ -1,7 +1,7 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
-using TicketingSystem.DataAccess.Enums;
+using TicketingSystem.Common.Enums;
 
 namespace TicketingSystem.DataAccess.Entities
 {

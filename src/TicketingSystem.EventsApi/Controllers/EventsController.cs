@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
-using TicketingSystem.BusinessLogic.Enums;
 using TicketingSystem.BusinessLogic.Services;
+using TicketingSystem.Common.Enums;
 using TicketingSystem.EventsApi.Models;
 
 namespace TicketingSystem.EventsApi.Controllers
@@ -16,24 +16,16 @@ namespace TicketingSystem.EventsApi.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    public class EventsController : ControllerBase
+    public class EventsController(
+        IEventService eventService,
+        IEventSeatService eventSeatService,
+        IEventSectionService eventSectionService,
+        IMapper mapper) : ControllerBase
     {
-        private readonly IEventService _eventService;
-        private readonly IEventSeatService _eventSeatService;
-        private readonly IEventSectionService _eventSectionService;
-        private readonly IMapper _mapper;
-
-        public EventsController(
-            IEventService eventService,
-            IEventSeatService eventSeatService,
-            IEventSectionService eventSectionService,
-            IMapper mapper)
-        {
-            _eventService = eventService;
-            _eventSeatService = eventSeatService;
-            _eventSectionService = eventSectionService;
-            _mapper = mapper;
-        }
+        private readonly IEventService _eventService = eventService;
+        private readonly IEventSeatService _eventSeatService = eventSeatService;
+        private readonly IEventSectionService _eventSectionService = eventSectionService;
+        private readonly IMapper _mapper = mapper;
 
         /// <summary>
         /// Returns a list of Venues with their info (no additional entities attached)

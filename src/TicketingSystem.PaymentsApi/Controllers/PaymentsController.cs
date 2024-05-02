@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
-using TicketingSystem.BusinessLogic.Enums;
 using TicketingSystem.BusinessLogic.Services;
+using TicketingSystem.Common.Enums;
 
 namespace TicketingSystem.PaymentsApi.Controllers
 {
@@ -14,22 +14,15 @@ namespace TicketingSystem.PaymentsApi.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    public class PaymentsController : ControllerBase
+    public class PaymentsController(
+        ICartItemService cartItemService,
+        IPaymentService paymentService,
+        IEventSeatService eventSeatService)
+        : ControllerBase
     {
-        private readonly IPaymentService _paymentService;
-        private readonly IEventSeatService _eventSeatService;
-        private readonly ICartItemService _cartItemService;
-
-        public PaymentsController(
-            ICartItemService cartItemService,
-            IPaymentService paymentService,
-            IEventSeatService eventSeatService,
-            IMapper mapper)
-        {
-            _cartItemService = cartItemService;
-            _paymentService = paymentService;
-            _eventSeatService = eventSeatService;
-        }
+        private readonly IPaymentService _paymentService = paymentService;
+        private readonly IEventSeatService _eventSeatService = eventSeatService;
+        private readonly ICartItemService _cartItemService = cartItemService;
 
         /// <summary>
         /// Returns a statusof the payment
@@ -109,7 +102,7 @@ namespace TicketingSystem.PaymentsApi.Controllers
 
             var eventSeats = await _eventSeatService.FilterAsync(es => es.Id, cartItems.Select(c => c.EventSeatId).ToList());
 
-            if (eventSeats is null || !eventSeats.Any())
+            if (eventSeats is null || eventSeats.Count == 0)
             {
                 return BadRequest();
             }

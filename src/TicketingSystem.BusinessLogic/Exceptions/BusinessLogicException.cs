@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace TicketingSystem.BusinessLogic.Exceptions
 {
@@ -8,8 +7,7 @@ namespace TicketingSystem.BusinessLogic.Exceptions
     {
         public BusinessLogicException() { }
 
-        public BusinessLogicException(string message) : base(message)
-        {
-        }
+        public BusinessLogicException(string message, Exception innerException = null) : base(message, innerException)
+        { }
     }
 }

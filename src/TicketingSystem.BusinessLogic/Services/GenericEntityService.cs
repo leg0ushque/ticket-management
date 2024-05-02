@@ -11,28 +11,36 @@ using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
-    public class GenericEntityService<TEntity, TEntityDto>
+    public class GenericEntityService<TEntity, TEntityDto>(IMongoRepository<TEntity> repository, IMapper mapper)
         where TEntity : class, IHasId
         where TEntityDto : class, IDto
     {
-        private protected readonly IMongoRepository<TEntity> _repository;
-        private protected readonly IMapper _mapper;
-
-        public GenericEntityService(IMongoRepository<TEntity> repository, IMapper mapper)
-        {
-            _repository = repository;
-            _mapper = mapper;
-        }
+        private protected readonly IMongoRepository<TEntity> _repository = repository;
+        private protected readonly IMapper _mapper = mapper;
 
         public Task CreateAsync(TEntityDto entity, CancellationToken cancellationToken = default)
         {
-            return _repository.CreateAsync(_mapper.Map<TEntity>(entity), cancellationToken);
+            try
+            {
+                return _repository.CreateAsync(_mapper.Map<TEntity>(entity), cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessLogicException(ex.Message, ex);
+            }
         }
 
         public async Task<IReadOnlyCollection<TEntityDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return _mapper.Map<List<TEntityDto>>(
-                    await _repository.GetAllAsync(cancellationToken));
+            try
+            {
+                return _mapper.Map<List<TEntityDto>>(
+                        await _repository.GetAllAsync(cancellationToken));
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessLogicException(ex.Message, ex);
+            }
         }
 
         public async Task<TEntityDto> GetByIdAsync(string entityId, CancellationToken cancellationToken = default)
@@ -42,9 +50,9 @@ namespace TicketingSystem.BusinessLogic.Services
                 return _mapper.Map<TEntityDto>(
                     await _repository.GetByIdAsync(entityId, cancellationToken));
             }
-            catch (ArgumentException)
+            catch (Exception ex)
             {
-                throw new BusinessLogicException($"There is no {nameof(TEntity)} found by Id='{entityId}'.");
+                throw new BusinessLogicException(ex.Message, ex);
             }
         }
 
@@ -56,15 +64,22 @@ namespace TicketingSystem.BusinessLogic.Services
 
                 return _repository.UpdateAsync(entity.Id, mappedEntity, cancellationToken);
             }
-            catch (ArgumentException)
+            catch (Exception ex)
             {
-                throw new BusinessLogicException($"There is no {nameof(TEntity)} found by Id='{entity.Id}' to update.");
+                throw new BusinessLogicException(ex.Message, ex);
             }
         }
 
         public Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, CancellationToken cancellationToken = default)
         {
-            return _repository.UpdateAsync(id, field, newValue, cancellationToken);
+            try
+            {
+                return _repository.UpdateAsync(id, field, newValue, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessLogicException(ex.Message, ex);
+            }
         }
 
         public Task DeleteAsync(string entityId, CancellationToken cancellationToken = default)
@@ -73,24 +88,38 @@ namespace TicketingSystem.BusinessLogic.Services
             {
                 return _repository.DeleteAsync(entityId, cancellationToken);
             }
-            catch (ArgumentException)
+            catch (Exception ex)
             {
-                throw new BusinessLogicException($"There is no {nameof(TEntity)} found by Id='{entityId}' to delete.");
+                throw new BusinessLogicException(ex.Message, ex);
             }
         }
 
         public async Task<IReadOnlyCollection<TEntityDto>> FilterAsync(Expression<Func<TEntity, bool>> expression,
             CancellationToken cancellationToken = default)
         {
-            return _mapper.Map<List<TEntityDto>>(
-                    await _repository.FilterAsync(expression, cancellationToken))
-                .AsReadOnly();
+            try
+            {
+                return _mapper.Map<List<TEntityDto>>(
+                        await _repository.FilterAsync(expression, cancellationToken))
+                    .AsReadOnly();
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessLogicException(ex.Message, ex);
+            }
         }
 
         public async Task<IReadOnlyCollection<TEntityDto>> FilterAsync<TField>(Expression<Func<TEntity, TField>> field, IEnumerable<TField> values, CancellationToken cancellationToken = default)
         {
-            return _mapper.Map<List<TEntityDto>>(await _repository.FilterAsync(field, values, cancellationToken))
-                .AsReadOnly();
+            try
+            {
+                return _mapper.Map<List<TEntityDto>>(await _repository.FilterAsync(field, values, cancellationToken))
+                    .AsReadOnly();
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessLogicException(ex.Message, ex);
+            }
         }
     }
 }

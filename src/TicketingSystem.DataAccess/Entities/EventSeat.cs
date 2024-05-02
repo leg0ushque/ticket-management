@@ -1,4 +1,4 @@
-﻿using TicketingSystem.DataAccess.Enums;
+﻿using TicketingSystem.Common.Enums;
 
 namespace TicketingSystem.DataAccess.Entities
 {

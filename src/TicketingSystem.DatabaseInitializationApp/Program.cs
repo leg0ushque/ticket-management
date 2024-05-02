@@ -1,12 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TicketingSystem.Common.Enums;
 using TicketingSystem.DataAccess.Entities;
-using TicketingSystem.DataAccess.Enums;
 using TicketingSystem.DataAccess.Factories;
 using TicketingSystem.DataAccess.Repositories;
 
@@ -14,7 +13,7 @@ namespace TicketingSystem.DatabaseInitializationApp
 {
     public static class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             var env = Environment.GetEnvironmentVariable("ENVIRONMENT") ?? throw new ArgumentException("ENV VAR");
             var config = new ConfigurationBuilder()

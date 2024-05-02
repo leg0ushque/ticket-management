@@ -1,5 +1,5 @@
 ﻿using System;
-using TicketingSystem.BusinessLogic.Enums;
+using TicketingSystem.Common.Enums;
 
 namespace TicketingSystem.BusinessLogic.Dtos
 {

@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
-using TicketingSystem.BusinessLogic.Enums;
 using TicketingSystem.BusinessLogic.Services;
+using TicketingSystem.Common.Enums;
 using TicketingSystem.PurchasesApi.Models;
 
 namespace TicketingSystem.PurchasesApi.Controllers
@@ -17,30 +16,20 @@ namespace TicketingSystem.PurchasesApi.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    public class OrdersController : ControllerBase
+    public class OrdersController(
+        ICartItemService cartItemService,
+        ITicketService ticketService,
+        IPaymentService paymentService,
+        IEventService eventService,
+        IEventSeatService eventSeatService,
+        IMapper mapper) : ControllerBase
     {
-        private readonly IEventService _eventService;
-        private readonly IEventSeatService _eventSeatService;
-        private readonly IPaymentService _paymentService;
-        private readonly ITicketService _ticketService;
-        private readonly ICartItemService _cartItemService;
-        private readonly IMapper _mapper;
-
-        public OrdersController(
-            ICartItemService cartItemService,
-            ITicketService ticketService,
-            IPaymentService paymentService,
-            IEventService eventService,
-            IEventSeatService eventSeatService,
-            IMapper mapper)
-        {
-            _cartItemService = cartItemService;
-            _ticketService = ticketService;
-            _paymentService = paymentService;
-            _eventService = eventService;
-            _eventSeatService = eventSeatService;
-            _mapper = mapper;
-        }
+        private readonly IEventService _eventService = eventService;
+        private readonly IEventSeatService _eventSeatService = eventSeatService;
+        private readonly IPaymentService _paymentService = paymentService;
+        private readonly ITicketService _ticketService = ticketService;
+        private readonly ICartItemService _cartItemService = cartItemService;
+        private readonly IMapper _mapper = mapper;
 
         /// <summary>
         /// Returns a list a list of items in a cart
@@ -135,7 +124,7 @@ namespace TicketingSystem.PurchasesApi.Controllers
             {
                 EventSeatId = model.SeatId,
                 EventId = model.EventId,
-                State = BusinessLogic.Enums.TicketState.NotPurchased,
+                State = TicketState.NotPurchased,
                 PriceOption = model.PriceOption,
                 Price = model.Price,
                 PurchasedOn = null,
@@ -154,7 +143,7 @@ namespace TicketingSystem.PurchasesApi.Controllers
 
             await _cartItemService.CreateAsync(cartItem);
 
-            var cartItems = await _cartItemService.FilterAsync(ci => ci.CartId == cartId);
+            var cartItems = await _cartItemService.FilterAsync(ci => ci.CartId == cartId); // already has newly created CartItem
 
             var payment = await _paymentService.UpsertInProgressPayment(cartId, cartItems.Select(x => x.Id).ToArray());
 
