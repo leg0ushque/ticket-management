@@ -66,7 +66,7 @@ namespace TicketingSystem.PurchasesApi.Controllers
         }
 
         /// <summary>
-        /// Adds a seat to the cart. Returns Aacart state (with total amount)
+        /// Adds a seat to the cart. Returns the cart state (with total amount)
         /// </summary>
         /// <returns></returns>
         [HttpDelete]

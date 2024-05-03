@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
+using TicketingSystem.DataAccess.Entities;
 
 namespace TicketingSystem.PaymentsApi.Controllers
 {
@@ -24,7 +25,7 @@ namespace TicketingSystem.PaymentsApi.Controllers
         private readonly ICartItemService _cartItemService = cartItemService;
 
         /// <summary>
-        /// Returns a statusof the payment
+        /// Returns a status of the payment
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -42,20 +43,14 @@ namespace TicketingSystem.PaymentsApi.Controllers
         /// Updates payment status and moves all the seats related to a payment to the sold state.
         /// </summary>
         /// <returns></returns>
-               [HttpPost]
+        [HttpPost]
         [Route("{paymentId}/complete")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CompletePayment([FromRoute] string paymentId)
         {
-            var payment = await _paymentService.GetByIdAsync(paymentId);
-
-            var seatsUpdateStatus = await UpdatePaymentEventSeatsAsync(payment, EventSeatState.Sold);
-
-            await _paymentService.UpdatePaymentState(payment.Id, PaymentState.Completed);
-
-            return seatsUpdateStatus;
+            return Ok(await UpdatePayment(paymentId, EventSeatState.Sold, PaymentState.Completed));
         }
 
         /// <summary>
@@ -69,11 +64,16 @@ namespace TicketingSystem.PaymentsApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> FailPayment([FromRoute] string paymentId)
         {
+            return Ok(await UpdatePayment(paymentId, EventSeatState.Available, PaymentState.Failed));
+        }
+
+        private async Task<IActionResult> UpdatePayment(string paymentId, EventSeatState eventSeatsState, PaymentState paymentState)
+        {
             var payment = await _paymentService.GetByIdAsync(paymentId);
 
-            var seatsUpdateStatus = await UpdatePaymentEventSeatsAsync(payment, EventSeatState.Available);
+            var seatsUpdateStatus = await UpdatePaymentEventSeatsAsync(payment, eventSeatsState);
 
-            await _paymentService.UpdatePaymentState(payment.Id, PaymentState.Failed);
+            await _paymentService.UpdatePaymentState(payment.Id, paymentState);
 
             return seatsUpdateStatus;
         }
