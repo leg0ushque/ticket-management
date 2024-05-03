@@ -66,7 +66,7 @@ namespace TicketingSystem.BusinessLogic.Services
         /// <exception cref="BusinessLogicException"></exception>
         public async Task<TEntityDto> GetByIdAsync(string entityId, CancellationToken cancellationToken = default)
         {
-            var foundEntity = GetEntityById(entityId, cancellationToken);
+            var foundEntity = await GetEntityById(entityId, cancellationToken);
 
             return foundEntity == null
                 ? throw new BusinessLogicException($"{nameof(TEntity)} wasn't found by ID {entityId}", code: Common.Enums.ErrorCode.NotFound)
