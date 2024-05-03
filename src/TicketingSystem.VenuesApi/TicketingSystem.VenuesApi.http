@@ -1,6 +1,0 @@
-@TicketingSystem.VenuesApi_HostAddress = http://localhost:5029
-
-GET {{TicketingSystem.VenuesApi_HostAddress}}/venues/
-Accept: application/json
-
-###

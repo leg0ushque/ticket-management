@@ -1,8 +1,0 @@
-@TicketingSystem.PaymentsApi_HostAddress = http://localhost:5192
-
-@TicketingSystem.CartId = SomeValueHere;
-
-GET {{TicketingSystem.PaymentsApi_HostAddress}}/orders/{{TicketingSystem.CartId}}
-Accept: application/json
-
-###
