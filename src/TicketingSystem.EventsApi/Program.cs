@@ -7,12 +7,13 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Reflection;
+using TicketingSystem.Api;
 using TicketingSystem.BusinessLogic;
 using TicketingSystem.BusinessLogic.Mapper;
 
 namespace TicketingSystem.EventsApi
 {
-    public static class Program
+    public class Program : BaseProgram
     {
         public static void Main(string[] args)
         {
@@ -29,7 +30,7 @@ namespace TicketingSystem.EventsApi
 
             builder.Services.AddBusinessLogicServices(connectionString, databaseName);
 
-            builder.Services.SetupMapper();
+            builder.Services.AddSingleton(SetupMapper());
 
             builder.Services.AddControllers();
 
@@ -63,24 +64,6 @@ namespace TicketingSystem.EventsApi
             app.MapControllers();
 
             app.Run();
-        }
-
-        public static IServiceCollection SetupMapper(this IServiceCollection services)
-        {
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new BusinessLogicMappingProfile());
-            });
-            var mapper = mapperConfig.CreateMapper();
-            return services.AddSingleton(mapper);
-        }
-
-        public static IConfiguration SetupConfiguration(string env)
-        {
-            return new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile($"settings.{env}.json")
-                .Build();
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,9 +35,7 @@ namespace TicketingSystem.PaymentsApi.Controllers
         {
             var payment = await _paymentService.GetByIdAsync(paymentId);
 
-            return payment is null ?
-                NotFound(nameof(paymentId))
-                : Ok(payment.State);
+            return Ok(payment.State);
         }
 
         /// <summary>
@@ -53,11 +50,6 @@ namespace TicketingSystem.PaymentsApi.Controllers
         public async Task<IActionResult> CompletePayment([FromRoute] string paymentId)
         {
             var payment = await _paymentService.GetByIdAsync(paymentId);
-
-            if (payment is null)
-            {
-                return NotFound(nameof(paymentId));
-            }
 
             var seatsUpdateStatus = await UpdatePaymentEventSeatsAsync(payment, EventSeatState.Sold);
 
@@ -79,11 +71,6 @@ namespace TicketingSystem.PaymentsApi.Controllers
         {
             var payment = await _paymentService.GetByIdAsync(paymentId);
 
-            if (payment is null)
-            {
-                return NotFound(nameof(paymentId));
-            }
-
             var seatsUpdateStatus = await UpdatePaymentEventSeatsAsync(payment, EventSeatState.Available);
 
             await _paymentService.UpdatePaymentState(payment.Id, PaymentState.Failed);
@@ -100,16 +87,9 @@ namespace TicketingSystem.PaymentsApi.Controllers
                 return BadRequest();
             }
 
-            var eventSeats = await _eventSeatService.FilterAsync(es => es.Id, cartItems.Select(c => c.EventSeatId).ToList());
-
-            if (eventSeats is null || eventSeats.Count == 0)
-            {
-                return BadRequest();
-            }
-
-            var eventSeatsIds = eventSeats.Select(es => es.Id).ToList();
-
-            await _eventSeatService.UpdateEventSeatsStates(eventSeatsIds, state);
+            await _eventSeatService.UpdateEventSeatsStates(
+                cartItems.Select(c => c.EventSeatId).ToList(),
+                state);
 
             return Ok();
         }

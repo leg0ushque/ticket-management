@@ -18,6 +18,13 @@ namespace TicketingSystem.BusinessLogic.Services
         private protected readonly IMongoRepository<TEntity> _repository = repository;
         private protected readonly IMapper _mapper = mapper;
 
+        /// <summary>
+        /// Creates an <see cref="TEntity"/> entity with data from <see cref="TEntityDto"/>
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessLogicException"></exception>
         public Task CreateAsync(TEntityDto entity, CancellationToken cancellationToken = default)
         {
             try
@@ -30,6 +37,13 @@ namespace TicketingSystem.BusinessLogic.Services
             }
         }
 
+        /// <summary>
+        /// Retrieves <see cref="IReadOnlyCollection{TEntity}"> of <see cref="TEntity"/> entity
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessLogicException"></exception>
         public async Task<IReadOnlyCollection<TEntityDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             try
@@ -43,17 +57,23 @@ namespace TicketingSystem.BusinessLogic.Services
             }
         }
 
+        /// <summary>
+        /// Retrieves a <see cref="TEntityDto"> of <see cref="TEntity"/> by its ID
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessLogicException"></exception>
         public async Task<TEntityDto> GetByIdAsync(string entityId, CancellationToken cancellationToken = default)
         {
-            try
+            var foundEntity = GetEntityById(entityId, cancellationToken);
+
+            if (foundEntity == null)
             {
-                return _mapper.Map<TEntityDto>(
-                    await _repository.GetByIdAsync(entityId, cancellationToken));
+                throw new BusinessLogicException($"{nameof(TEntity)} wasn't found by ID {entityId}", code: Common.Enums.ErrorCode.NotFound);
             }
-            catch (Exception ex)
-            {
-                throw new BusinessLogicException(ex.Message, ex);
-            }
+
+            return _mapper.Map<TEntityDto>(foundEntity);
         }
 
         public Task UpdateAsync(TEntityDto entity, CancellationToken cancellationToken = default)
@@ -115,6 +135,18 @@ namespace TicketingSystem.BusinessLogic.Services
             {
                 return _mapper.Map<List<TEntityDto>>(await _repository.FilterAsync(field, values, cancellationToken))
                     .AsReadOnly();
+            }
+            catch (Exception ex)
+            {
+                throw new BusinessLogicException(ex.Message, ex);
+            }
+        }
+
+        private async Task<TEntity> GetEntityById(string entityId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return await _repository.GetByIdAsync(entityId, cancellationToken);
             }
             catch (Exception ex)
             {

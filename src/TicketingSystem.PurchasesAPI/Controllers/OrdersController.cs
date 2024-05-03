@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using TicketingSystem.Api.Filters;
 using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
+using TicketingSystem.DataAccess.Repositories;
 using TicketingSystem.PurchasesApi.Models;
 
 namespace TicketingSystem.PurchasesApi.Controllers
@@ -16,18 +19,18 @@ namespace TicketingSystem.PurchasesApi.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
+    [BusinessLogicExceptionFilter]
     public class OrdersController(
         ICartItemService cartItemService,
-        ITicketService ticketService,
         IPaymentService paymentService,
         IEventService eventService,
         IEventSeatService eventSeatService,
-        IMapper mapper) : ControllerBase
+        IMapper mapper)
+        : ControllerBase
     {
         private readonly IEventService _eventService = eventService;
         private readonly IEventSeatService _eventSeatService = eventSeatService;
         private readonly IPaymentService _paymentService = paymentService;
-        private readonly ITicketService _ticketService = ticketService;
         private readonly ICartItemService _cartItemService = cartItemService;
         private readonly IMapper _mapper = mapper;
 
@@ -55,19 +58,17 @@ namespace TicketingSystem.PurchasesApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> AddSeatToCart([FromRoute] string cartId, [FromBody] AddCartModel model)
         {
-            var existingEvent = await _eventService.GetByIdAsync(model.EventId);
-            if(existingEvent is null)
-            {
-                return NotFound(nameof(model.EventId));
-            }
+            await _cartItemService.AddSeatToCart(cartId, model.EventId, model.SeatId, model.Price, model.PriceOption, model.UserId);
 
-            var existingSeatId = await _eventSeatService.GetByIdAsync(model.SeatId);
-            if (existingSeatId is null)
-            {
-                return NotFound(nameof(model.SeatId));
-            }
+            var cartItems = await _cartItemService.GetItemsOfCart(cartId); // already has newly created CartItem
 
-            return Ok(await AddSeatToCart(model, cartId));
+            var payment = await _paymentService.UpsertInProgressPayment(cartId, cartItems.Select(x => x.Id).ToArray());
+
+            return Ok(new SeatStateModel
+            {
+                Amount = cartItems.Count,
+                State = _mapper.Map<PaymentState>(payment.State),
+            });
         }
 
         /// <summary>
@@ -78,21 +79,11 @@ namespace TicketingSystem.PurchasesApi.Controllers
         [Route("carts/{cartId}/events/{eventId}/seats/{seatId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> AddSeatToCart([FromRoute] string cartId, [FromRoute] string eventId, [FromRoute] string seatId)
+        public async Task<IActionResult> DeleteSeatFromCart([FromRoute] string cartId, [FromRoute] string eventId, [FromRoute] string seatId)
         {
-            var existingEvent = await _eventService.GetByIdAsync(eventId);
-            if(existingEvent is null)
-            {
-                return NotFound(nameof(eventId));
-            }
+            await _cartItemService.DeleteSeatFromCart(eventId, seatId, cartId);
 
-            var existingSeatId = await _eventSeatService.GetByIdAsync(seatId);
-            if (existingSeatId is null)
-            {
-                return NotFound(nameof(seatId));
-            }
-
-            return await DeleteSeatFromCart(seatId, cartId);
+            return Ok();
         }
 
         /// <summary>
@@ -101,75 +92,14 @@ namespace TicketingSystem.PurchasesApi.Controllers
         [HttpPut]
         [Route("carts/{cartId}/book")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> BookSeatsInCart([FromRoute] string cartId)
         {
-            var seats = (await _cartItemService.FilterAsync(s => s.CartId == cartId))?.Select(ci => ci.EventSeatId).ToList();
+            await _eventSeatService.BookSeatsInCart(cartId);
 
-            await _eventSeatService.UpdateEventSeatsStates(seats ?? Enumerable.Empty<string>().ToList(), EventSeatState.Booked);
-
-            var paymentsOfCart = await _paymentService.FilterAsync(p => p.CartId == cartId);
-            var payment = paymentsOfCart?.FirstOrDefault();
-
-            if (paymentsOfCart == null || payment == null)
-            {
-                return NotFound(nameof(paymentsOfCart)); // TODO Verify that payment is created during other transactions
-            }
+            var payment = await _paymentService.GetIncompletePayment(cartId);
 
             return Ok(payment.Id);
-        }
-
-        private async Task<SeatStateModel> AddSeatToCart(AddCartModel model, string cartId)
-        {
-            var ticket = new TicketDto
-            {
-                EventSeatId = model.SeatId,
-                EventId = model.EventId,
-                State = TicketState.NotPurchased,
-                PriceOption = model.PriceOption,
-                Price = model.Price,
-                PurchasedOn = null,
-                UserId = model.UserId,
-            };
-
-            await _ticketService.CreateAsync(ticket);
-
-            var cartItem = new CartItemDto
-            {
-                CartId = cartId,
-                TicketId = ticket.Id,
-                EventSeatId = model.SeatId,
-                CreatedOn = DateTimeOffset.UtcNow
-            };
-
-            await _cartItemService.CreateAsync(cartItem);
-
-            var cartItems = await _cartItemService.FilterAsync(ci => ci.CartId == cartId); // already has newly created CartItem
-
-            var payment = await _paymentService.UpsertInProgressPayment(cartId, cartItems.Select(x => x.Id).ToArray());
-
-            return new SeatStateModel
-            {
-                Amount = cartItems.Count,
-                State = _mapper.Map<PaymentState>(payment.State),
-            };
-        }
-
-        private async Task<IActionResult> DeleteSeatFromCart(string seatId, string cartId)
-        {
-            var cartItem = (await _cartItemService.FilterAsync(ci =>
-                ci.EventSeatId == seatId
-                && ci.CartId == cartId)).FirstOrDefault();
-
-            if (cartItem == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                await _cartItemService.DeleteAsync(cartItem.Id);
-
-                return Ok();
-            }
         }
     }
 }

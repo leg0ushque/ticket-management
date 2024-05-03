@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
+using TicketingSystem.BusinessLogic.Exceptions;
 using TicketingSystem.Common.Enums;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
@@ -15,6 +17,25 @@ namespace TicketingSystem.BusinessLogic.Services
         public Task UpdatePaymentState(string paymentId, PaymentState state)
         {
             return _repository.UpdateAsync(paymentId, p => p.State, _mapper.Map<PaymentState>(state));
+        }
+
+        public async Task<Payment> GetIncompletePayment(string cartId)
+        {
+            var payments = await GetCartPayments(cartId);
+
+            var payment = payments?.Find(p => p.State == PaymentState.InProgress);
+
+            if (payments == null || payment == null)
+            {
+                throw new BusinessLogicException($"No payment was found by CartId {cartId}", code: ErrorCode.NotFound); // TODO Verify that payment is created during other transactions
+            }
+
+            return payment;
+        }
+
+        public Task<List<Payment>> GetCartPayments(string cartId)
+        {
+            return _repository.FilterAsync(p => p.CartId == cartId);
         }
 
         public async Task<Payment> UpsertInProgressPayment(string cartId, string[] cartItemsIds, CancellationToken cancellationToken = default)

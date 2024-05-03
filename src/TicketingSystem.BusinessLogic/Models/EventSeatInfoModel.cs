@@ -1,6 +1,6 @@
 ﻿using TicketingSystem.Common.Enums;
 
-namespace TicketingSystem.EventsApi.Models
+namespace TicketingSystem.BusinessLogic.Models
 {
     public class EventSeatInfoModel
     {

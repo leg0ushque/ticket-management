@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using TicketingSystem.Api.Filters;
 using TicketingSystem.BusinessLogic.Services;
 
 namespace TicketingSystem.VenuesApi.Controllers
@@ -10,17 +11,11 @@ namespace TicketingSystem.VenuesApi.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    public class VenuesController : ControllerBase
+    [BusinessLogicExceptionFilter]
+    public class VenuesController(IVenueService venuesService)
+        : ControllerBase
     {
-        private readonly IVenueService _venuesService;
-        private readonly ISectionService _sectionsService;
-        public VenuesController(
-            IVenueService venuesService,
-            ISectionService sectionsService)
-        {
-            _venuesService = venuesService;
-            _sectionsService = sectionsService;
-        }
+        private readonly IVenueService _venuesService = venuesService;
 
         /// <summary>
         /// Returns a list of Venues with their info (no additional entities attached)
@@ -47,13 +42,7 @@ namespace TicketingSystem.VenuesApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetVenueSections([FromRoute] string venueId)
         {
-            var venue = await _venuesService.GetByIdAsync(venueId);
-            if(venue == null)
-            {
-                return NotFound();
-            }
-
-            var sections = await _sectionsService.FilterAsync(x => x.VenueId == venueId);
+            var sections = await _venuesService.GetVenueSectionsAsync(venueId);
 
             return Ok(sections);
         }

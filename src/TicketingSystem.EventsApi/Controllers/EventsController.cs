@@ -1,13 +1,7 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Services;
-using TicketingSystem.Common.Enums;
-using TicketingSystem.EventsApi.Models;
 
 namespace TicketingSystem.EventsApi.Controllers
 {
@@ -19,13 +13,11 @@ namespace TicketingSystem.EventsApi.Controllers
     public class EventsController(
         IEventService eventService,
         IEventSeatService eventSeatService,
-        IEventSectionService eventSectionService,
-        IMapper mapper) : ControllerBase
+        IEventSectionService eventSectionService) : ControllerBase
     {
         private readonly IEventService _eventService = eventService;
         private readonly IEventSeatService _eventSeatService = eventSeatService;
         private readonly IEventSectionService _eventSectionService = eventSectionService;
-        private readonly IMapper _mapper = mapper;
 
         /// <summary>
         /// Returns a list of Venues with their info (no additional entities attached)
@@ -53,55 +45,11 @@ namespace TicketingSystem.EventsApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetFullSeats([FromRoute] string eventId, [FromRoute] string sectionId)
         {
-            var foundEvent = await _eventService.GetByIdAsync(eventId);
-
-            if (foundEvent is null)
-            {
-                return NotFound(nameof(eventId));
-            }
+            _ = await _eventService.GetByIdAsync(eventId);
 
             var section = await _eventSectionService.GetByIdAsync(sectionId);
 
-            if (section is null)
-            {
-                return NotFound(nameof(sectionId));
-            }
-
-            return Ok(await GetSeatsInfo(section));
-        }
-
-        private async Task<List<EventSeatInfoModel>> GetSeatsInfo(EventSectionDto section)
-        {
-            var seatsInfo = section.EventRows.SelectMany(er => er.EventSeatsIds, (er, seatId) => new
-            {
-                sectionId = section.Id,
-                sectionClass = section.Class,
-                sectionNumber = section.Number,
-                rowNumber = er.Number,
-                price = er.Price,
-                seatId
-            })
-                .ToList();
-
-            var result = new List<EventSeatInfoModel>();
-
-            foreach (var data in seatsInfo)
-            {
-                var seat = await _eventSeatService.GetByIdAsync(data.seatId);
-
-                result.Add(new EventSeatInfoModel
-                {
-                    EventSectionId = data.sectionId,
-                    EventSectionClass = data.sectionClass,
-                    EventSectionNumber = data.sectionNumber,
-                    EventRowNumber = data.rowNumber,
-                    EventRowPrice = data.price,
-                    EventSeatNumber = seat.Number,
-                    EventSeatState = _mapper.Map<EventSeatState>(seat.State),
-                });
-            }
-
-            return result;
+            return Ok(await _eventSeatService.GetSeatsInfo(section));
         }
     }
 }

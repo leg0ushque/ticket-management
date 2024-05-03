@@ -29,6 +29,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\TicketingSystem.Api\TicketingSystem.Api.csproj" />
 		<ProjectReference Include="..\TicketingSystem.BusinessLogic\TicketingSystem.BusinessLogic.csproj" />
 	</ItemGroup>
 
