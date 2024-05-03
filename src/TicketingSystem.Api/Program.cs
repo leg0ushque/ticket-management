@@ -1,3 +1,4 @@
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,12 +7,12 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Reflection;
-using TicketingSystem.Api;
 using TicketingSystem.BusinessLogic;
+using TicketingSystem.BusinessLogic.Mapper;
 
-namespace TicketingSystem.VenuesApi
+namespace TicketingSystem.WebApi
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -33,6 +34,7 @@ namespace TicketingSystem.VenuesApi
             builder.Services.AddControllers();
 
             builder.Services.AddEndpointsApiExplorer();
+
             builder.Services.AddSwaggerGen(config =>
             {
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -41,7 +43,7 @@ namespace TicketingSystem.VenuesApi
 
                 config.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Venues API",
+                    Title = "Web API",
                     Version = "v1"
                 });
 
@@ -56,14 +58,28 @@ namespace TicketingSystem.VenuesApi
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
 
             app.MapControllers();
 
             app.Run();
+        }
+        public static IMapper SetupMapper()
+        {
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new BusinessLogicMappingProfile());
+            });
+
+            return mapperConfig.CreateMapper();
+        }
+
+        public static IConfiguration SetupConfiguration(string env)
+        {
+            return new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile($"settings.{env}.json")
+                .Build();
         }
     }
 }

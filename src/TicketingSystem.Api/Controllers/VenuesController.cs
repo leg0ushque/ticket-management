@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.WebApi.Filters;
 
-namespace TicketingSystem.VenuesApi.Controllers
+namespace TicketingSystem.WebApi.Controllers
 {
     /// <summary>
     /// API to manipulate over Venues, Sections, Rows

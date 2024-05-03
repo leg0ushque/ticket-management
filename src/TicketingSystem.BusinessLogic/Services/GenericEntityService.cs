@@ -68,12 +68,9 @@ namespace TicketingSystem.BusinessLogic.Services
         {
             var foundEntity = GetEntityById(entityId, cancellationToken);
 
-            if (foundEntity == null)
-            {
-                throw new BusinessLogicException($"{nameof(TEntity)} wasn't found by ID {entityId}", code: Common.Enums.ErrorCode.NotFound);
-            }
-
-            return _mapper.Map<TEntityDto>(foundEntity);
+            return foundEntity == null
+                ? throw new BusinessLogicException($"{nameof(TEntity)} wasn't found by ID {entityId}", code: Common.Enums.ErrorCode.NotFound)
+                : _mapper.Map<TEntityDto>(foundEntity);
         }
 
         public Task UpdateAsync(TEntityDto entity, CancellationToken cancellationToken = default)

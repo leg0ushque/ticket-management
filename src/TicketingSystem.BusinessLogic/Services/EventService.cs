@@ -5,9 +5,8 @@ using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
-    public class EventService : GenericEntityService<Event, EventDto>, IEventService
+    public class EventService(IMongoRepository<Event> repository, IMapper mapper)
+        : GenericEntityService<Event, EventDto>(repository, mapper), IEventService
     {
-        public EventService(IMongoRepository<Event> repository, IMapper mapper) : base(repository, mapper)
-        { }
     }
 }

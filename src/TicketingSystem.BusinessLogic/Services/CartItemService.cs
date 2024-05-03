@@ -26,7 +26,7 @@ namespace TicketingSystem.BusinessLogic.Services
 
         public async Task<List<CartItemDto>> GetItemsOfCart(string cartId, CancellationToken cancellationToken = default)
         {
-            return _mapper.Map<List<CartItemDto>>(await _repository.FilterAsync(ci => ci.CartId == cartId)).ToList();
+            return [.. _mapper.Map<List<CartItemDto>>(await _repository.FilterAsync(ci => ci.CartId == cartId, cancellationToken))];
         }
 
         public async Task AddSeatToCart(string cartId, string eventId, string seatId, decimal price, PriceOption priceOption, string userId, CancellationToken cancellationToken = default)
