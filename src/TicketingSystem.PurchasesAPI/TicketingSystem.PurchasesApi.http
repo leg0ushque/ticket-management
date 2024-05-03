@@ -1,6 +1,6 @@
 @TicketingSystem.PurchasesAPI_HostAddress = http://localhost:5091
 
-GET {{TicketingSystem.PurchasesAPI_HostAddress}}/weatherforecast/
+GET {{TicketingSystem.PurchasesAPI_HostAddress}}/purchases/
 Accept: application/json
 
 ###

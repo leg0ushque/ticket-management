@@ -1,15 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TicketingSystem.Api.Filters;
-using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
-using TicketingSystem.DataAccess.Repositories;
 using TicketingSystem.PurchasesApi.Models;
 
 namespace TicketingSystem.PurchasesApi.Controllers
@@ -23,12 +19,10 @@ namespace TicketingSystem.PurchasesApi.Controllers
     public class OrdersController(
         ICartItemService cartItemService,
         IPaymentService paymentService,
-        IEventService eventService,
         IEventSeatService eventSeatService,
         IMapper mapper)
         : ControllerBase
     {
-        private readonly IEventService _eventService = eventService;
         private readonly IEventSeatService _eventSeatService = eventSeatService;
         private readonly IPaymentService _paymentService = paymentService;
         private readonly ICartItemService _cartItemService = cartItemService;
