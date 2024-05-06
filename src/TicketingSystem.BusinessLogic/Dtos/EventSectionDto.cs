@@ -10,6 +10,6 @@
 
         public int Number { get; set; }
 
-        public EventRowDto[] EventRows { get; set; }
+        public EventSeatDto[] EventSeats { get; set; }
     }
 }

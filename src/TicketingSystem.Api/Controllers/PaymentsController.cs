@@ -14,14 +14,13 @@ namespace TicketingSystem.WebApi.Controllers
     [ApiController]
     [Route("[controller]")]
     public class PaymentsController(
-        ICartItemService cartItemService,
         IPaymentService paymentService,
-        IEventSeatService eventSeatService)
+        IEventSectionService eventSectionService)
         : ControllerBase
     {
         private readonly IPaymentService _paymentService = paymentService;
-        private readonly IEventSeatService _eventSeatService = eventSeatService;
-        private readonly ICartItemService _cartItemService = cartItemService;
+
+        private readonly IEventSectionService _eventSectionService = eventSectionService;
 
         /// <summary>
         /// Returns a status of the payment
@@ -49,7 +48,9 @@ namespace TicketingSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CompletePayment([FromRoute] string paymentId)
         {
-            return Ok(await UpdatePayment(paymentId, EventSeatState.Sold, PaymentState.Completed));
+            await UpdatePayment(paymentId, EventSeatState.Sold, PaymentState.Completed);
+
+            return Ok();
         }
 
         /// <summary>
@@ -63,34 +64,24 @@ namespace TicketingSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> FailPayment([FromRoute] string paymentId)
         {
-            return Ok(await UpdatePayment(paymentId, EventSeatState.Available, PaymentState.Failed));
+            await UpdatePayment(paymentId, EventSeatState.Available, PaymentState.Failed);
+
+            return Ok();
         }
 
-        private async Task<IActionResult> UpdatePayment(string paymentId, EventSeatState eventSeatsState, PaymentState paymentState)
+        private async Task UpdatePayment(string paymentId, EventSeatState eventSeatsState, PaymentState paymentState)
         {
             var payment = await _paymentService.GetByIdAsync(paymentId);
 
-            var seatsUpdateStatus = await UpdatePaymentEventSeatsAsync(payment, eventSeatsState);
+            // Events with sections containing a list of seats to update
+            var groupedCartItems = await _paymentService.GetPaymentEventSeats(payment.Id);
 
-            await _paymentService.UpdatePaymentState(payment.Id, paymentState);
-
-            return seatsUpdateStatus;
-        }
-
-        private async Task<IActionResult> UpdatePaymentEventSeatsAsync(PaymentDto payment, EventSeatState state)
-        {
-            var cartItems = await _cartItemService.FilterAsync(ci => ci.Id, payment.CartItemIds);
-
-            if (cartItems is null)
+            foreach (var item in groupedCartItems)
             {
-                return BadRequest();
+                await _eventSectionService.UpdateEventSeatsState(item.EventId, item.SectionSeats, eventSeatsState);
             }
 
-            await _eventSeatService.UpdateEventSeatsStates(
-                cartItems.Select(c => c.EventSeatId).ToList(),
-                state);
-
-            return Ok();
+            await _paymentService.UpdatePaymentState(payment.Id, paymentState);
         }
     }
 }

@@ -11,9 +11,7 @@ namespace TicketingSystem.DataAccess
         {
             return services
                 .AddSingleton<IMongoDbFactory>(new MongoDbFactory(connectionString, databaseName))
-                .AddTransient<IMongoRepository<CartItem>, CartItemRepository>()
                 .AddTransient<IMongoRepository<Event>, EventRepository>()
-                .AddTransient<IMongoRepository<EventSeat>, EventSeatRepository>()
                 .AddTransient<IMongoRepository<EventSection>, EventSectionRepository>()
                 .AddTransient<IMongoRepository<Payment>, PaymentRepository>()
                 .AddTransient<IMongoRepository<Ticket>, TicketRepository>()

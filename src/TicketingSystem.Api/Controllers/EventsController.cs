@@ -12,11 +12,9 @@ namespace TicketingSystem.WebApi.Controllers
     [Route("[controller]")]
     public class EventsController(
         IEventService eventService,
-        IEventSeatService eventSeatService,
         IEventSectionService eventSectionService) : ControllerBase
     {
         private readonly IEventService _eventService = eventService;
-        private readonly IEventSeatService _eventSeatService = eventSeatService;
         private readonly IEventSectionService _eventSectionService = eventSectionService;
 
         /// <summary>
@@ -47,9 +45,7 @@ namespace TicketingSystem.WebApi.Controllers
         {
             _ = await _eventService.GetByIdAsync(eventId);
 
-            var section = await _eventSectionService.GetByIdAsync(sectionId);
-
-            return Ok(await _eventSeatService.GetSeatsInfo(section));
+            return Ok(await _eventSectionService.GetSeatsInfo(sectionId));
         }
     }
 }

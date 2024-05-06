@@ -10,25 +10,18 @@ using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
-    public class VenueService : GenericEntityService<Venue, VenueDto>, IVenueService
+    public class VenueService(IMongoRepository<Venue> venueRepository, IMongoRepository<Section> sectionRepository, IMapper mapper)
+        : GenericEntityService<Venue, VenueDto>(venueRepository, mapper), IVenueService
     {
-        private readonly IMongoRepository<Section> _sectionRepository;
-
-        public VenueService(IMongoRepository<Venue> venueRepository, IMongoRepository<Section> sectionRepository, IMapper mapper) : base(venueRepository, mapper)
-        {
-            _sectionRepository = sectionRepository;
-        }
+        private readonly IMongoRepository<Section> _sectionRepository = sectionRepository;
 
         public async Task<List<Section>> GetVenueSectionsAsync(string venueId, CancellationToken cancellationToken = default)
         {
             var venue = await _repository.GetByIdAsync(venueId, cancellationToken);
 
-            if (venue == null)
-            {
-                throw new BusinessLogicException("Venue wasn't found", code: ErrorCode.NotFound);
-            }
-
-            return await _sectionRepository.FilterAsync(x => x.VenueId == venueId, cancellationToken);
+            return venue == null
+                ? throw new BusinessLogicException("Venue wasn't found", code: ErrorCode.NotFound)
+                : await _sectionRepository.FilterAsync(x => x.VenueId == venueId, cancellationToken);
         }
     }
 }

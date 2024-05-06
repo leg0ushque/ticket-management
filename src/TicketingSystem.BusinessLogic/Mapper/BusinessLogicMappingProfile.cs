@@ -10,7 +10,6 @@ namespace TicketingSystem.BusinessLogic.Mapper
         {
             CreateMap<CartItem, CartItemDto>().ReverseMap();
             CreateMap<Event, EventDto>().ReverseMap();
-            CreateMap<EventRow, EventRowDto>().ReverseMap();
             CreateMap<EventSeat, EventSeatDto>().ReverseMap();
             CreateMap<EventSection, EventSectionDto>().ReverseMap();
             CreateMap<Payment, PaymentDto>().ReverseMap();

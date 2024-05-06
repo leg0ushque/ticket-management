@@ -10,11 +10,11 @@ namespace TicketingSystem.BusinessLogic.Models
 
         public int EventSectionNumber { get; set; }
 
-        public int EventRowNumber { get; set; }
+        public int RowNumber { get; set; }
 
-        public decimal EventRowPrice { get; set; }
+        public int SeatNumber { get; set; }
 
-        public int EventSeatNumber { get; set; }
+        public decimal Price { get; set; }
 
         public EventSeatState EventSeatState { get; set; }
     }

@@ -10,6 +10,8 @@ namespace TicketingSystem.DataAccess.Entities
 
         public string Email { get; set; }
 
+        public string CartId { get; set; }
+
         public UserRole Role { get; set; }
     }
 }

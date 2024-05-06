@@ -8,6 +8,6 @@
 
         public int Number { get; set; }
 
-        public EventRow[] EventRows { get; set; }
+        public EventSeat[] EventSeats { get; set; }
     }
 }

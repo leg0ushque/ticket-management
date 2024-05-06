@@ -1,10 +1,16 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using TicketingSystem.BusinessLogic.Dtos;
+using TicketingSystem.BusinessLogic.Models;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
+using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.WebApi.Filters;
 using TicketingSystem.WebApi.Models;
 
@@ -17,16 +23,12 @@ namespace TicketingSystem.WebApi.Controllers
     [Route("[controller]")]
     [BusinessLogicExceptionFilter]
     public class OrdersController(
-        ICartItemService cartItemService,
         IPaymentService paymentService,
-        IEventSeatService eventSeatService,
-        IMapper mapper)
+        IEventSectionService eventSectionService)
         : ControllerBase
     {
-        private readonly IEventSeatService _eventSeatService = eventSeatService;
         private readonly IPaymentService _paymentService = paymentService;
-        private readonly ICartItemService _cartItemService = cartItemService;
-        private readonly IMapper _mapper = mapper;
+        private readonly IEventSectionService _eventSectionService = eventSectionService;
 
         /// <summary>
         /// Returns a list a list of items in a cart
@@ -37,9 +39,9 @@ namespace TicketingSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetCartItems([FromRoute] string cartId)
         {
-            var items = await _cartItemService.FilterAsync(ci => ci.CartId == cartId);
+            var payment = await _paymentService.GetIncompletePayment(cartId);
 
-            return Ok(items);
+            return Ok(payment.CartItems);
         }
 
         /// <summary>
@@ -49,20 +51,33 @@ namespace TicketingSystem.WebApi.Controllers
         [HttpPost]
         [Route("carts/{cartId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> AddSeatToCart([FromRoute] string cartId, [FromBody] AddCartModel model)
         {
-            await _cartItemService.AddSeatToCart(cartId, model.EventId, model.SeatId, model.Price, model.PriceOption, model.UserId);
-
-            var cartItems = await _cartItemService.GetItemsOfCart(cartId); // already has newly created CartItem
-
-            var payment = await _paymentService.UpsertInProgressPayment(cartId, cartItems.Select(x => x.Id).ToArray());
-
-            return Ok(new SeatStateModel
+            if (model == null || model.EventId == null || model.SeatId == null)
             {
-                Amount = cartItems.Count,
-                State = _mapper.Map<PaymentState>(payment.State),
-            });
+                return BadRequest("Expected not-null EventId and SeatId values");
+            }
+
+            var eventSection = await _eventSectionService.GetSectionBySeatIdAsync(model.SeatId, model.EventId);
+            var eventSeat = eventSection.EventSeats.FirstOrDefault(x => x.Id == model.SeatId);
+
+            var paymentStateModel = await _paymentService.AppendCartItem(cartId, model.EventId,
+                new CartItemDto
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    EventId = model.EventId,
+                    EventRowNumber = eventSeat.RowNumber,
+                    EventSeatId = eventSeat.Id,
+                    EventSeatNumber = eventSeat.SeatNumber,
+                    EventSectionId = eventSeat.EventSectionId,
+                    EventSectionClass = eventSeat.EventSectionClass,
+                    EventSectionNumber = eventSeat.EventSectionNumber,
+                    Price = model.Price
+                });
+
+            return Ok(paymentStateModel);
         }
 
         /// <summary>
@@ -75,7 +90,9 @@ namespace TicketingSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteSeatFromCart([FromRoute] string cartId, [FromRoute] string eventId, [FromRoute] string seatId)
         {
-            await _cartItemService.DeleteSeatFromCart(eventId, seatId, cartId);
+            await _paymentService.DeleteSeatFromCart(seatId, cartId);
+
+            await _eventSectionService.UpdateEventSeatState(seatId, eventId, EventSeatState.Available);
 
             return Ok();
         }
@@ -89,9 +106,15 @@ namespace TicketingSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> BookSeatsInCart([FromRoute] string cartId)
         {
-            await _eventSeatService.BookSeatsInCart(cartId);
-
             var payment = await _paymentService.GetIncompletePayment(cartId);
+
+            // Events with sections containing a list of seats to update
+            var groupedCartItems = await _paymentService.GetPaymentEventSeats(payment.Id);
+
+            foreach (var item in groupedCartItems)
+            {
+                await _eventSectionService.BookSeatsOfEvent(item.EventId, item.SectionSeats);
+            }
 
             return Ok(payment.Id);
         }

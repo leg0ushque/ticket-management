@@ -1,18 +1,21 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
-using System;
-
-namespace TicketingSystem.DataAccess.Entities
+﻿namespace TicketingSystem.DataAccess.Entities
 {
-    public class CartItem : BaseEntity
+    public class CartItem
     {
-        public string CartId { get; set; }
+        public string EventId { get; set; }
 
-        public string TicketId { get; set; }
+        public string EventSectionId { get; set; }
+
+        public string EventSectionClass { get; set; }
+
+        public int EventSectionNumber { get; set; }
 
         public string EventSeatId { get; set; }
 
-        [BsonRepresentation(BsonType.DateTime)]
-        public DateTimeOffset CreatedOn { get; set; }
+        public int EventRowNumber { get; set; }
+
+        public int EventSeatNumber { get; set; }
+
+        public decimal Price { get; set; }
     }
 }

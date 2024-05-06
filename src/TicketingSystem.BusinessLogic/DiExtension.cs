@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.DataAccess;
-using TicketingSystem.DataAccess.Entities;
 
 namespace TicketingSystem.BusinessLogic
 {
@@ -19,10 +17,8 @@ namespace TicketingSystem.BusinessLogic
         private static IServiceCollection RegisterServices(this IServiceCollection services)
         {
             return services
-                .AddTransient<ICartItemService, CartItemService>()
                 .AddTransient<IEventService, EventService>()
                 .AddTransient<IEventSectionService, EventSectionService>()
-                .AddTransient<IEventSeatService, EventSeatService>()
                 .AddTransient<IPaymentService, PaymentService>()
                 .AddTransient<ISectionService, SectionService>()
                 .AddTransient<ITicketService, TicketService>()
