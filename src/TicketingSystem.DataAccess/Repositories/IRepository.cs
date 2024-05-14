@@ -4,12 +4,16 @@ using System.Threading.Tasks;
 
 namespace TicketingSystem.DataAccess.Repositories
 {
-    public interface IRepository<TEntity, TKey>
+    public interface IRepository<TEntity>
     {
         Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default);
+
         Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<TEntity> GetByIdAsync(TKey id, CancellationToken cancellationToken = default);
-        Task UpdateAsync(TKey id, TEntity entity, CancellationToken cancellationToken = default);
-        Task DeleteAsync(TKey id, CancellationToken cancellationToken = default);
+
+        Task<TEntity> GetByIdAsync(string id, CancellationToken cancellationToken = default);
+
+        Task UpdateAsync(string id, TEntity entity, CancellationToken cancellationToken = default);
+
+        Task DeleteAsync(string id, CancellationToken cancellationToken = default);
     }
 }

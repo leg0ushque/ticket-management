@@ -1,4 +1,4 @@
-﻿using TicketingSystem.DataAccess.Enums;
+﻿using TicketingSystem.Common.Enums;
 
 namespace TicketingSystem.DataAccess.Entities
 {
@@ -9,6 +9,8 @@ namespace TicketingSystem.DataAccess.Entities
         public string LastName { get; set; }
 
         public string Email { get; set; }
+
+        public string CartId { get; set; }
 
         public UserRole Role { get; set; }
     }

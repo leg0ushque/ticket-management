@@ -1,4 +1,4 @@
-﻿namespace TicketingSystem.DataAccess.Enums
+﻿namespace TicketingSystem.Common.Enums
 {
     public enum PriceOption
     {
