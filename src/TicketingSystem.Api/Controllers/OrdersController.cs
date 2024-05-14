@@ -60,11 +60,6 @@ namespace TicketingSystem.WebApi.Controllers
                 return BadRequest("Expected not-null EventId and SeatId values");
             }
 
-            if (string.IsNullOrEmpty(cartId))
-            {
-                return BadRequest("Expected not-null cartId");
-            }
-
             var eventSection = await _eventSectionService.GetSectionBySeatIdAsync(model.SeatId, model.EventId);
             var eventSeat = eventSection.EventSeats.FirstOrDefault(x => x.Id == model.SeatId);
 
