@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
-using TicketingSystem.BusinessLogic.Models;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
-using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.WebApi.Filters;
 using TicketingSystem.WebApi.Models;
 

@@ -11,7 +11,7 @@ using TicketingSystem.Common.Enums;
 using TicketingSystem.WebApi.Controllers;
 using Xunit;
 
-namespace TicketingSystem.WebApi.Tests
+namespace TicketingSystem.WebApi.Tests.Controllers
 {
     public class EventsControllerTests
     {
