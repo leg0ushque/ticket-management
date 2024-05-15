@@ -15,9 +15,21 @@ namespace TicketingSystem.BusinessLogic.Services
     public class PaymentService(IMongoRepository<Payment> repository, IMapper mapper)
         : GenericEntityService<Payment, PaymentDto>(repository, mapper), IPaymentService
     {
-        public Task UpdatePaymentState(string paymentId, PaymentState state)
+        public async Task UpdatePaymentState(string paymentId, PaymentState state, CancellationToken cancellationToken = default)
         {
-            return _repository.UpdateAsync(paymentId, p => p.State, _mapper.Map<PaymentState>(state));
+            var payment = await _repository.GetByIdAsync(paymentId, cancellationToken);
+
+            if(state is PaymentState.Completed or PaymentState.Failed)
+            {
+                payment.State = state;
+                payment.CartItems = [];
+
+                await _repository.UpdateAsync(paymentId, payment, cancellationToken);
+            }
+            else
+            {
+                await _repository.UpdateAsync(paymentId, p => p.State, _mapper.Map<PaymentState>(state), cancellationToken);
+            }
         }
 
         public async Task<List<EventSectionSeatsModel>> GetPaymentEventSeats(string paymentId, CancellationToken cancellationToken = default)

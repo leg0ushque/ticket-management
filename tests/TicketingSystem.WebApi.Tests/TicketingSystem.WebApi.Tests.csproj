@@ -6,6 +6,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="DataAccess\**" />
+	  <EmbeddedResource Remove="DataAccess\**" />
+	  <None Remove="DataAccess\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="AutoFixture" Version="4.18.1" />
 		<PackageReference Include="AutoFixture.AutoMoq" Version="4.18.1" />
 		<PackageReference Include="FluentAssertions" Version="6.12.0" />
@@ -20,13 +26,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\src\TicketingSystem.Api\TicketingSystem.WebApi.csproj" />
-	  <ProjectReference Include="..\..\src\TicketingSystem.BusinessLogic\TicketingSystem.BusinessLogic.csproj" />
-	  <ProjectReference Include="..\..\src\TicketingSystem.Common\TicketingSystem.Common.csproj" />
-	  <ProjectReference Include="..\..\src\TicketingSystem.DataAccess\TicketingSystem.DataAccess.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="DataAccess\" />
+		<ProjectReference Include="..\..\src\TicketingSystem.Api\TicketingSystem.WebApi.csproj" />
+		<ProjectReference Include="..\..\src\TicketingSystem.BusinessLogic\TicketingSystem.BusinessLogic.csproj" />
+		<ProjectReference Include="..\..\src\TicketingSystem.Common\TicketingSystem.Common.csproj" />
 	</ItemGroup>
 </Project>

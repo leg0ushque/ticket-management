@@ -18,7 +18,7 @@ namespace TicketingSystem.BusinessLogic.Services
 
         public Task<List<PaymentDto>> GetCartPayments(string cartId, PaymentState state, CancellationToken cancellationToken = default);
 
-        public Task UpdatePaymentState(string paymentId, PaymentState state);
+        public Task UpdatePaymentState(string paymentId, PaymentState state, CancellationToken cancellationToken = default);
 
         public Task<PaymentStateModel> AppendCartItem(string cartId, string eventId, CartItemDto item, CancellationToken cancellationToken = default);
     }
