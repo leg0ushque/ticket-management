@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TicketingSystem.BusinessLogic.Dtos;
+using TicketingSystem.BusinessLogic.Exceptions;
 using TicketingSystem.BusinessLogic.Models;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
@@ -22,6 +23,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
 
         private readonly IFixture _fixture;
 
+        private List<EventSectionSeatsModel> _paymentSections;
         private readonly PaymentDto _payment;
         private readonly List<EventSectionDto> _eventSections;
 
@@ -39,6 +41,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
 
             _payment = CreatePayment();
             _eventSections = CreateEventSections();
+            _paymentSections = CreatePaymentInfo();
 
             SetupMocks();
 
@@ -128,6 +131,64 @@ namespace TicketingSystem.WebApi.Tests.Controllers
             responseObject.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
         }
 
+        [Fact]
+        public async Task DeleteSeatFromCart_WhenInvoked_ShouldReturnOk()
+        {
+            var eventId = Guid.NewGuid().ToString();
+            var section = _eventSections.FirstOrDefault();
+            var seatId = section.EventSeats.FirstOrDefault().Id;
+
+            // Act
+            var response = await _controller.DeleteSeatFromCart(_cartId, eventId, seatId);
+
+            // Assert
+            _paymentServiceMock.Verify(s =>
+                s.DeleteSeatFromCart(
+                    It.Is<string>(s => s == seatId),
+                    It.Is<string>(s => s == _cartId),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _eventSectionServiceMock.Verify(s =>
+                    s.UpdateEventSeatState(It.Is<string>(sId => sId == seatId),
+                        It.Is<string>(eId => eId == eventId),
+                        It.Is<EventSeatState>(s => s == EventSeatState.Available),
+                        It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            var responseObject = response as OkResult;
+            responseObject.StatusCode.Should().Be(StatusCodes.Status200OK);
+        }
+
+        [Fact]
+        public async Task BookSeatsInCart_WhenInvoked_ShouldReturnOkWithData()
+        {
+            // Act
+            var response = await _controller.BookSeatsInCart(_cartId);
+
+            // Assert
+            _paymentServiceMock.Verify(s =>
+                s.GetIncompletePayment(
+                    It.Is<string>(s => s == _cartId),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _paymentServiceMock.Verify(s =>
+                s.GetPaymentEventSeats(
+                    It.Is<string>(s => s == _payment.Id),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _eventSectionServiceMock.Verify(s =>
+                    s.BookSeatsOfEvent(It.IsAny<string>(), It.IsAny<SectionSeatsModel[]>(),
+                        It.IsAny<CancellationToken>()),
+                Times.Exactly(_paymentSections.Count));
+
+            var responseObject = response as OkObjectResult;
+            responseObject.StatusCode.Should().Be(StatusCodes.Status200OK);
+            (responseObject.Value as string).Should().Be(_payment.Id);
+        }
+
         private void SetupMocks()
         {
             _paymentServiceMock.Setup(s =>
@@ -148,6 +209,33 @@ namespace TicketingSystem.WebApi.Tests.Controllers
                 s.GetSectionBySeatIdAsync(It.IsAny<string>(), It.IsAny<string>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_eventSections.FirstOrDefault());
+
+            _paymentServiceMock.Setup(s =>
+                s.DeleteSeatFromCart(It.IsAny<string>(), It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _paymentServiceMock.Setup(s =>
+                s.GetIncompletePayment(It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(_payment);
+
+            _paymentServiceMock.Setup(s =>
+                s.GetPaymentEventSeats(It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(_paymentSections);
+        }
+
+        private List<EventSectionSeatsModel> CreatePaymentInfo()
+        {
+            return _fixture.Build<EventSectionSeatsModel>()
+                .With(e => e.EventId)
+                .With(e => e.SectionSeats,
+                    _fixture.Build<SectionSeatsModel>()
+                        .With(s => s.SectionId)
+                        .With(s => s.SeatIds)
+                        .CreateMany(5).ToArray())
+                .CreateMany(5).ToList();
         }
 
         private PaymentDto CreatePayment()
