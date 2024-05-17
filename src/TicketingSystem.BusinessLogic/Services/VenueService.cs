@@ -15,13 +15,14 @@ namespace TicketingSystem.BusinessLogic.Services
     {
         private readonly IMongoRepository<Section> _sectionRepository = sectionRepository;
 
-        public async Task<List<Section>> GetVenueSectionsAsync(string venueId, CancellationToken cancellationToken = default)
+        public async Task<List<SectionDto>> GetVenueSectionsAsync(string venueId, CancellationToken cancellationToken = default)
         {
             var venue = await _repository.GetByIdAsync(venueId, cancellationToken);
 
             return venue == null
                 ? throw new BusinessLogicException("Venue wasn't found", code: ErrorCode.NotFound)
-                : await _sectionRepository.FilterAsync(x => x.VenueId == venueId, cancellationToken);
+                : _mapper.Map<List<SectionDto>>(
+                    await _sectionRepository.FilterAsync(x => x.VenueId == venueId, cancellationToken));
         }
     }
 }
