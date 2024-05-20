@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TicketingSystem.BusinessLogic.Dtos;
+using TicketingSystem.BusinessLogic.Exceptions;
 using TicketingSystem.BusinessLogic.Models;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
@@ -20,9 +21,9 @@ namespace TicketingSystem.WebApi.Tests.Controllers
         private readonly string _cartId = Guid.NewGuid().ToString();
         private readonly string _seatId = Guid.NewGuid().ToString();
 
-        private readonly IFixture _fixture;
+        private readonly Fixture _fixture;
 
-        private List<EventSectionSeatsModel> _paymentSections;
+        private readonly List<EventSectionSeatsModel> _paymentSections;
         private readonly PaymentDto _payment;
         private readonly List<EventSectionDto> _eventSections;
 
@@ -38,7 +39,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
             _paymentServiceMock = new Mock<IPaymentService>();
             _eventSectionServiceMock = new Mock<IEventSectionService>();
 
-            _payment = CreatePayment();
+            _payment = CreatePayment(_cartId);
             _eventSections = CreateEventSections();
             _paymentSections = CreatePaymentInfo();
 
@@ -48,10 +49,10 @@ namespace TicketingSystem.WebApi.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetCartItems_WhenInvoked_ShouldReturnOkWithResponse()
+        public async Task GetCartItems_WhenInvokedWithCorrectCartId_ShouldReturnOkWithResponse()
         {
             // Act
-            var response = await _controller.GetCartItems(_fixture.Create<string>());
+            var response = await _controller.GetCartItems(_payment.CartId);
 
             // Assert
             _paymentServiceMock.Verify(s =>
@@ -72,7 +73,6 @@ namespace TicketingSystem.WebApi.Tests.Controllers
                 .With(m => m.SeatId, _seatId)
                 .With(m => m.Price)
                 .With(m => m.PriceOption)
-                .With(m => m.UserId)
                 .Create();
 
             // Act
@@ -94,6 +94,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
             responseObject.StatusCode.Should().Be(StatusCodes.Status200OK);
             responseObjectValue.ItemsAmount.Should().Be(ExistingCartItemsAmount + 1);
             responseObjectValue.State.Should().Be(PaymentState.InProgress);
+            responseObjectValue.CartId.Should().NotBeNullOrEmpty();
         }
 
         [Theory]
@@ -109,7 +110,6 @@ namespace TicketingSystem.WebApi.Tests.Controllers
                 .With(m => m.SeatId, seatId)
                 .With(m => m.Price)
                 .With(m => m.PriceOption)
-                .With(m => m.UserId)
                 .Create();
 
             // Act
@@ -174,7 +174,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
 
             _paymentServiceMock.Verify(s =>
                 s.GetPaymentEventSeats(
-                    It.Is<string>(s => s == _payment.Id),
+                    It.IsAny<PaymentDto>(),
                     It.IsAny<CancellationToken>()),
                 Times.Once);
 
@@ -191,9 +191,14 @@ namespace TicketingSystem.WebApi.Tests.Controllers
         private void SetupMocks()
         {
             _paymentServiceMock.Setup(s =>
-                s.GetIncompletePayment(It.IsAny<string>(),
+                s.GetIncompletePayment(It.Is<string>(s => s == _cartId),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_payment);
+
+            _paymentServiceMock.Setup(s =>
+                s.GetIncompletePayment(It.Is<string>(s => string.IsNullOrEmpty(s)),
+                    It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new BusinessLogicException());
 
             _paymentServiceMock.Setup(s =>
                 s.AppendCartItem(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CartItemDto>(),
@@ -201,7 +206,8 @@ namespace TicketingSystem.WebApi.Tests.Controllers
                 .ReturnsAsync(new PaymentStateModel
                 {
                     ItemsAmount = ExistingCartItemsAmount + 1,
-                    State = PaymentState.InProgress
+                    State = PaymentState.InProgress,
+                    CartId = _cartId
                 });
 
             _eventSectionServiceMock.Setup(s =>
@@ -220,9 +226,9 @@ namespace TicketingSystem.WebApi.Tests.Controllers
                 .ReturnsAsync(_payment);
 
             _paymentServiceMock.Setup(s =>
-                s.GetPaymentEventSeats(It.IsAny<string>(),
+                s.GetPaymentEventSeats(It.IsAny<PaymentDto>(),
                     It.IsAny<CancellationToken>()))
-                .ReturnsAsync(_paymentSections);
+                .Returns(_paymentSections);
         }
 
         private List<EventSectionSeatsModel> CreatePaymentInfo()
@@ -237,11 +243,11 @@ namespace TicketingSystem.WebApi.Tests.Controllers
                 .CreateMany(5).ToList();
         }
 
-        private PaymentDto CreatePayment()
+        private PaymentDto CreatePayment(string cartId)
         {
             return new PaymentDto()
             {
-                CartId = _cartId,
+                CartId = cartId,
                 State = PaymentState.InProgress,
                 CartItems = _fixture.Build<CartItemDto>()
                             .With(ci => ci.Id)

@@ -111,9 +111,9 @@ namespace TicketingSystem.WebApi.Tests.Controllers
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_payment);
 
-            _paymentServiceMock.Setup(s => s.GetPaymentEventSeats(It.IsAny<string>(),
+            _paymentServiceMock.Setup(s => s.GetPaymentEventSeats(It.IsAny<PaymentDto>(),
                     It.IsAny<CancellationToken>()))
-                .ReturnsAsync(_eventSections);
+                .Returns(_eventSections);
 
             _paymentServiceMock.Setup(s => s.UpdatePaymentState(It.IsAny<string>(), It.IsAny<PaymentState>(),
                     It.IsAny<CancellationToken>()))

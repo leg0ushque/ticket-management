@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using System.Threading.Tasks;
-using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
 
@@ -74,7 +72,7 @@ namespace TicketingSystem.WebApi.Controllers
             var payment = await _paymentService.GetByIdAsync(paymentId);
 
             // Events with sections containing a list of seats to update
-            var groupedCartItems = await _paymentService.GetPaymentEventSeats(payment.Id);
+            var groupedCartItems = _paymentService.GetPaymentEventSeats(payment);
 
             foreach (var item in groupedCartItems)
             {

@@ -62,6 +62,28 @@ namespace TicketingSystem.WebApi.Tests.Controllers
         }
 
         [Fact]
+        public async Task GetEventSections_WhenInvoked_ShouldReturnOkWithResponse()
+        {
+            // Arrange
+            var eventId = _events.FirstOrDefault().Id;
+
+            // Act
+            var response = await _controller.GetEventsSections(eventId);
+
+            // Assert
+            _eventSectionServiceMock.Verify(s =>
+                s.GetSectionsByEventIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            var responseObject = response as OkObjectResult;
+            responseObject.StatusCode.Should().Be(StatusCodes.Status200OK);
+            (responseObject.Value as List<EventSectionDto>)
+                .Should().BeEquivalentTo(_eventSections
+                    .Where(x => x.EventId == eventId)
+                    .ToList());
+        }
+
+        [Fact]
         public async Task GetFullSeats_WhenInvoked_ShouldReturnOkWithResponse()
         {
             var eventId = _events.FirstOrDefault().Id;
@@ -91,17 +113,23 @@ namespace TicketingSystem.WebApi.Tests.Controllers
 
         private void SetupMocks()
         {
+            var mainEvent = _events.FirstOrDefault();
+
             _eventServiceMock.Setup(s =>
                 s.GetAllAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_events.AsReadOnly());
 
             _eventServiceMock.Setup(s =>
                 s.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(_events.FirstOrDefault());
+                .ReturnsAsync(mainEvent);
 
             _eventSectionServiceMock.Setup(s =>
                 s.GetSeatsInfo(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(GetEventSeatInfo(_eventSections.FirstOrDefault()));
+
+            _eventSectionServiceMock.Setup(s =>
+                s.GetSectionsByEventIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(_eventSections.Where(es => es.EventId == mainEvent.Id).ToList());
         }
 
         private List<EventSectionDto> CreateEventSections()

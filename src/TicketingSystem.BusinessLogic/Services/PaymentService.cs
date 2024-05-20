@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -19,7 +20,7 @@ namespace TicketingSystem.BusinessLogic.Services
         {
             var payment = await _repository.GetByIdAsync(paymentId, cancellationToken);
 
-            if(state is PaymentState.Completed or PaymentState.Failed)
+            if (state is PaymentState.Completed or PaymentState.Failed)
             {
                 payment.State = state;
                 payment.CartItems = [];
@@ -32,46 +33,52 @@ namespace TicketingSystem.BusinessLogic.Services
             }
         }
 
-        public async Task<List<EventSectionSeatsModel>> GetPaymentEventSeats(string paymentId, CancellationToken cancellationToken = default)
+        public List<EventSectionSeatsModel> GetPaymentEventSeats(PaymentDto payment, CancellationToken cancellationToken = default)
         {
-            var payment = await GetByIdAsync(paymentId, cancellationToken);
-
             // Events with sections containing a list of seats to update
-            var groupedCartItems = payment.CartItems
-                .GroupBy(
-                    i => new { i.EventId, i.EventSectionId },
-                    (key, g) => new
-                    {
-                        key.EventId,
-                        SectionSeats = new SectionSeatsModel
+            return payment.CartItems
+                .GroupBy(x => x.EventId)
+                .Select(grp => new EventSectionSeatsModel
+                {
+                    EventId = grp.Key,
+                    SectionSeats = grp
+                        .GroupBy(x => x.EventSectionId)
+                        .Select(secGrp => new SectionSeatsModel
                         {
-                            SectionId = key.EventSectionId,
-                            SeatIds = g.Select(i => i.EventSeatId).ToArray()
-                        }
-                    }
-                )
-                .GroupBy(
-                    i => i.EventId,
-                    (key, g) => new EventSectionSeatsModel
-                    {
-                        EventId = key,
-                        SectionSeats = g.Select(x => x.SectionSeats).ToArray()
-                    }
-                );
-
-            return groupedCartItems.ToList();
+                            SectionId = secGrp.Key,
+                            SeatIds = secGrp.Select(x => x.EventSeatId).ToArray()
+                        })
+                        .ToArray()
+                })
+                .ToList();
         }
 
         public async Task<PaymentDto> GetIncompletePayment(string cartId, CancellationToken cancellationToken = default)
         {
-            var payments = await GetCartPayments(cartId, PaymentState.InProgress, cancellationToken);
-
-            if (payments == null || payments.Count == 0)
+            if (string.IsNullOrEmpty(cartId))
             {
-                throw new BusinessLogicException($"No payment was found by CartId {cartId}", code: ErrorCode.NotFound); // TODO Verify that payment is created during other transactions
+                throw new BusinessLogicException($"Non-empty CartId must be provided", code: ErrorCode.Other);
             }
 
-            return _mapper.Map<PaymentDto>(payments.FirstOrDefault());
+            var payments = await GetCartPayments(cartId, PaymentState.InProgress, cancellationToken);
+
+            if (payments != null && payments.Count != 0)
+            {
+                return payments.FirstOrDefault();
+            }
+            else
+            {
+                var newPayment = new Payment
+                {
+                    CartId = cartId,
+                    CartItems = [],
+                    State = PaymentState.InProgress,
+                };
+
+                await _repository.CreateAsync(newPayment, cancellationToken);
+
+                return _mapper.Map<PaymentDto>(newPayment);
+            }
         }
 
         public async Task<List<PaymentDto>> GetCartPayments(string cartId, PaymentState state, CancellationToken cancellationToken = default)
@@ -88,7 +95,7 @@ namespace TicketingSystem.BusinessLogic.Services
             CartItem[] updatedCartItems;
             var newItem = _mapper.Map<CartItem>(item);
 
-            if (payment.CartItems == null)
+            if (payment.CartItems == null || payment.CartItems.Length == 0)
             {
                 updatedCartItems = [newItem];
             }
@@ -103,12 +110,18 @@ namespace TicketingSystem.BusinessLogic.Services
             {
                 ItemsAmount = updatedCartItems.Length,
                 State = payment.State,
+                CartId = payment.CartId,
             };
         }
 
         public async Task DeleteSeatFromCart(string seatId, string cartId, CancellationToken cancellationToken = default)
         {
             var payment = await GetIncompletePayment(cartId, cancellationToken);
+
+            if (payment.CartItems.Length == 0)
+            {
+                throw new BusinessLogicException("There are no seats in the cart");
+            }
 
             var updatedCartItems = payment.CartItems.Where(ci => ci.EventSeatId != seatId).ToArray();
 

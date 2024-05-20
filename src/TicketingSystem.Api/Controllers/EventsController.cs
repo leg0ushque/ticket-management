@@ -32,6 +32,20 @@ namespace TicketingSystem.WebApi.Controllers
         }
 
         /// <summary>
+        /// Returns a list of Event Sections by EventId
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("{eventId}/sections")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetEventsSections([FromRoute] string eventId)
+        {
+            var eventSections = await _eventSectionService.GetSectionsByEventIdAsync(eventId);
+
+            return Ok(eventSections);
+        }
+
+        /// <summary>
         /// Returns a list of Event Seats (with Event Section id, Event Row Id) with their statuses and prices
         /// </summary>
         /// <param name="eventId"></param>

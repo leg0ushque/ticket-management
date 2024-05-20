@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
 using System;
 using System.IO;
 using TicketingSystem.DataAccess.Entities;
@@ -11,13 +10,18 @@ namespace TicketingSystem.IntegrationTests
     public class DatabaseFixture
     {
         public IMongoRepository<Event> EventRepositoryInstance { get; private set; }
+        public IMongoRepository<EventSection> EventSectionRepositoryInstance { get; private set; }
+        public IMongoRepository<Payment> PaymentRepositoryInstance { get; private set; }
+        public IMongoRepository<Ticket> TicketRepositoryInstance { get; private set; }
+        public IMongoRepository<User> UserRepositoryInstance { get; private set; }
+        public IMongoRepository<Venue> VenueRepositoryInstance { get; private set; }
+        public IMongoRepository<Section> SectionRepositoryInstance { get; private set; }
 
         public DatabaseFixture()
         {
-            var env = Environment.GetEnvironmentVariable("ENVIRONMENT") ?? throw new ArgumentException("ENV VAR");
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile($"settings.{env}.json")
+                .AddJsonFile($"settings.json")
                 .Build();
 
             var connectionString = config.GetConnectionString("connectionString");
@@ -26,6 +30,12 @@ namespace TicketingSystem.IntegrationTests
             var mongoDbFactory = new MongoDbFactory(connectionString, databaseName);
 
             EventRepositoryInstance = new EventRepository(mongoDbFactory);
+            EventSectionRepositoryInstance = new EventSectionRepository(mongoDbFactory);
+            PaymentRepositoryInstance = new PaymentRepository(mongoDbFactory);
+            TicketRepositoryInstance = new TicketRepository(mongoDbFactory);
+            UserRepositoryInstance = new UserRepository(mongoDbFactory);
+            VenueRepositoryInstance = new VenueRepository(mongoDbFactory);
+            SectionRepositoryInstance = new SectionRepository(mongoDbFactory);
         }
     }
 }

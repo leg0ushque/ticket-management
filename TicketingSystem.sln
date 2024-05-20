@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicketingSystem.WebApi", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicketingSystem.DataAccess.Tests", "tests\TicketingSystem.DataAccess.Tests\TicketingSystem.DataAccess.Tests.csproj", "{D2771964-D2A3-40A4-8BB6-E1AA8E8B6A15}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicketingSystem.WebApi.Tests", "tests\TicketingSystem.WebApi.Tests\TicketingSystem.WebApi.Tests.csproj", "{3BAEFCC8-38DE-4A76-B340-0AB7AE3D6511}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TicketingSystem.WebApi.Tests", "tests\TicketingSystem.WebApi.Tests\TicketingSystem.WebApi.Tests.csproj", "{3BAEFCC8-38DE-4A76-B340-0AB7AE3D6511}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

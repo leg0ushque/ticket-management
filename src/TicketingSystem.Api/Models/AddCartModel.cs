@@ -11,7 +11,5 @@ namespace TicketingSystem.WebApi.Models
         public decimal Price { get; set; }
 
         public PriceOption PriceOption { get; set; }
-
-        public string UserId { get; set;}
     }
 }
