@@ -11,12 +11,25 @@ using TicketingSystem.Common.Enums;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
 using TicketingSystem.WebApi.Controllers;
-using Xunit;
 
 namespace TicketingSystem.IntegrationTests
 {
     public class FixtureTestsBase
     {
+        public readonly string CartId = Guid.NewGuid().ToString();
+
+        protected readonly Fixture fixture;
+        private readonly DatabaseFixture _dbFixture;
+        private readonly IMapper mapper;
+
+        protected readonly IEventService _eventService;
+        protected readonly IEventSectionService _eventSectionService;
+        protected readonly IPaymentService _paymentService;
+        protected readonly ITicketService _ticketService;
+        protected readonly IUserService _userService;
+        protected readonly IVenueService _venueService;
+        protected readonly ISectionService _sectionService;
+
         public FixtureTestsBase(DatabaseFixture dbFixture)
         {
             _dbFixture = dbFixture;
@@ -43,13 +56,6 @@ namespace TicketingSystem.IntegrationTests
             OrdersController = new OrdersController(_paymentService, _eventSectionService);
         }
 
-        public readonly string CartId = Guid.NewGuid().ToString();
-
-        private readonly IMapper mapper;
-
-        private readonly DatabaseFixture _dbFixture;
-        protected readonly Fixture fixture;
-
         public EventsController EventsController { get; set; }
         public PaymentsController PaymentsController { get; set; }
         public OrdersController OrdersController { get; set; }
@@ -61,14 +67,6 @@ namespace TicketingSystem.IntegrationTests
         public List<string> UsersIds { get; set; }
         public List<string> VenuesIds { get; set; }
         public List<string> SectionsIds { get; set; }
-
-        private readonly IEventService _eventService;
-        private readonly IEventSectionService _eventSectionService;
-        private readonly IPaymentService _paymentService;
-        private readonly ITicketService _ticketService;
-        private readonly IUserService _userService;
-        private readonly IVenueService _venueService;
-        private readonly ISectionService _sectionService;
 
         public Task DeleteGeneratedEntities(CancellationToken ct = default)
         {

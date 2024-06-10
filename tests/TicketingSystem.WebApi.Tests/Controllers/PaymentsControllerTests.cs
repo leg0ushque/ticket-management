@@ -105,14 +105,14 @@ namespace TicketingSystem.WebApi.Tests.Controllers
             var statusResult = response as OkResult;
             statusResult.StatusCode.Should().Be(StatusCodes.Status200OK);
         }
+
         private void SetupMocks()
         {
             _paymentServiceMock.Setup(s => s.GetByIdAsync(It.IsAny<string>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_payment);
 
-            _paymentServiceMock.Setup(s => s.GetPaymentEventSeats(It.IsAny<PaymentDto>(),
-                    It.IsAny<CancellationToken>()))
+            _paymentServiceMock.Setup(s => s.GetPaymentEventSeats(It.IsAny<PaymentDto>()))
                 .Returns(_eventSections);
 
             _paymentServiceMock.Setup(s => s.UpdatePaymentState(It.IsAny<string>(), It.IsAny<PaymentState>(),

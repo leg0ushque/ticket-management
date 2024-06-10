@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,24 +15,25 @@ namespace TicketingSystem.BusinessLogic.Services
     public class PaymentService(IMongoRepository<Payment> repository, IMapper mapper)
         : GenericEntityService<Payment, PaymentDto>(repository, mapper), IPaymentService
     {
-        public async Task UpdatePaymentState(string paymentId, PaymentState state, CancellationToken cancellationToken = default)
+        public async Task UpdatePaymentState(string paymentId, PaymentState newState, CancellationToken cancellationToken = default)
         {
             var payment = await _repository.GetByIdAsync(paymentId, cancellationToken);
 
-            if (state is PaymentState.Completed or PaymentState.Failed)
+            if(payment.State == newState)
             {
-                payment.State = state;
-                payment.CartItems = [];
+                return;
+            }
 
-                await _repository.UpdateAsync(paymentId, payment, cancellationToken);
-            }
-            else
+            payment.State = newState;
+            if (newState is PaymentState.Completed or PaymentState.Failed)
             {
-                await _repository.UpdateAsync(paymentId, p => p.State, _mapper.Map<PaymentState>(state), cancellationToken);
+                payment.CartItems = [];
             }
+
+            await _repository.UpdateAsync(paymentId, payment, cancellationToken);
         }
 
-        public List<EventSectionSeatsModel> GetPaymentEventSeats(PaymentDto payment, CancellationToken cancellationToken = default)
+        public List<EventSectionSeatsModel> GetPaymentEventSeats(PaymentDto payment)
         {
             // Events with sections containing a list of seats to update
             return payment.CartItems
@@ -66,19 +66,17 @@ namespace TicketingSystem.BusinessLogic.Services
             {
                 return payments.FirstOrDefault();
             }
-            else
+
+            var newPayment = new Payment
             {
-                var newPayment = new Payment
-                {
-                    CartId = cartId,
-                    CartItems = [],
-                    State = PaymentState.InProgress,
-                };
+                CartId = cartId,
+                CartItems = [],
+                State = PaymentState.InProgress,
+            };
 
-                await _repository.CreateAsync(newPayment, cancellationToken);
+            await _repository.CreateAsync(newPayment, cancellationToken);
 
-                return _mapper.Map<PaymentDto>(newPayment);
-            }
+            return _mapper.Map<PaymentDto>(newPayment);
         }
 
         public async Task<List<PaymentDto>> GetCartPayments(string cartId, PaymentState state, CancellationToken cancellationToken = default)

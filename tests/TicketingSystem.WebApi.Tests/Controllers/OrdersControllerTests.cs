@@ -174,8 +174,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
 
             _paymentServiceMock.Verify(s =>
                 s.GetPaymentEventSeats(
-                    It.IsAny<PaymentDto>(),
-                    It.IsAny<CancellationToken>()),
+                    It.IsAny<PaymentDto>()),
                 Times.Once);
 
             _eventSectionServiceMock.Verify(s =>
@@ -226,8 +225,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
                 .ReturnsAsync(_payment);
 
             _paymentServiceMock.Setup(s =>
-                s.GetPaymentEventSeats(It.IsAny<PaymentDto>(),
-                    It.IsAny<CancellationToken>()))
+                s.GetPaymentEventSeats(It.IsAny<PaymentDto>()))
                 .Returns(_paymentSections);
         }
 

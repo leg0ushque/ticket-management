@@ -139,9 +139,8 @@ namespace TicketingSystem.IntegrationTests.Processes
 
             // Verify cart items were deleted
 
-            var deletedCartItemsResponse = await OrdersController.GetCartItems(CartId) as OkObjectResult;
-            var deletedCartItems = deletedCartItemsResponse.Value as CartItemDto[];
-            deletedCartItems.Should().BeEmpty();
+            var actualPayment = await _paymentService.GetByIdAsync(paymentId);
+            actualPayment.CartItems.Should().BeEmpty();
 
             // Verify Event Seats has matching state
 
@@ -157,11 +156,12 @@ namespace TicketingSystem.IntegrationTests.Processes
 
             paymentResponse = await PaymentsController.GetPaymentStatus(paymentId) as OkObjectResult;
             var paymentUpdatedState = paymentResponse.Value as PaymentState?;
-            paymentUpdatedState.Should().Be(paymentUpdatedState);
+            paymentUpdatedState.Should().Be(updatedPaymentState);
 
             // Teardown & cleanup
 
             await TearDown();
+            await _paymentService.DeleteAsync(paymentId);
         }
 
         [Theory]
@@ -201,6 +201,8 @@ namespace TicketingSystem.IntegrationTests.Processes
 
             firstSeatAddResultValue.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             firstSeatAddResultValue.Value.Should().NotBeNull();
+
+            // Teardown & cleanup
 
             await TearDown();
         }

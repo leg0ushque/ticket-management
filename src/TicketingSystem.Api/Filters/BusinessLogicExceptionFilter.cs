@@ -11,15 +11,9 @@ namespace TicketingSystem.WebApi.Filters
         {
             if(context.Exception is BusinessLogicException bex)
             {
-                int statusCode;
-                if(bex.Code == Common.Enums.ErrorCode.NotFound)
-                {
-                    statusCode = (int)HttpStatusCode.NotFound;
-                }
-                else
-                {
-                    statusCode = (int)HttpStatusCode.BadRequest;
-                }
+                int statusCode = bex.Code == Common.Enums.ErrorCode.NotFound ?
+                    (int)HttpStatusCode.NotFound
+                    : (int)HttpStatusCode.BadRequest;
 
                 var result = new ObjectResult(new
                 {
