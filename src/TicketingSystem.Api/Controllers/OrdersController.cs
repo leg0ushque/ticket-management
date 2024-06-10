@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
-using TicketingSystem.BusinessLogic.Models;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
-using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.WebApi.Filters;
 using TicketingSystem.WebApi.Models;
 
@@ -60,6 +55,11 @@ namespace TicketingSystem.WebApi.Controllers
                 return BadRequest("Expected not-null EventId and SeatId values");
             }
 
+            if (string.IsNullOrEmpty(cartId))
+            {
+                return BadRequest("Expected not-null cartId");
+            }
+
             var eventSection = await _eventSectionService.GetSectionBySeatIdAsync(model.SeatId, model.EventId);
             var eventSeat = eventSection.EventSeats.FirstOrDefault(x => x.Id == model.SeatId);
 
@@ -71,9 +71,9 @@ namespace TicketingSystem.WebApi.Controllers
                     EventRowNumber = eventSeat.RowNumber,
                     EventSeatId = eventSeat.Id,
                     EventSeatNumber = eventSeat.SeatNumber,
-                    EventSectionId = eventSeat.EventSectionId,
-                    EventSectionClass = eventSeat.EventSectionClass,
-                    EventSectionNumber = eventSeat.EventSectionNumber,
+                    EventSectionId = eventSection.Id,
+                    EventSectionClass = eventSection.Class,
+                    EventSectionNumber = eventSection.Number,
                     Price = model.Price
                 });
 
@@ -109,7 +109,7 @@ namespace TicketingSystem.WebApi.Controllers
             var payment = await _paymentService.GetIncompletePayment(cartId);
 
             // Events with sections containing a list of seats to update
-            var groupedCartItems = await _paymentService.GetPaymentEventSeats(payment.Id);
+            var groupedCartItems = _paymentService.GetPaymentEventSeats(payment);
 
             foreach (var item in groupedCartItems)
             {

@@ -8,6 +8,6 @@ namespace TicketingSystem.BusinessLogic.Services
 {
     public interface IVenueService : IService<Venue, VenueDto>
     {
-        public Task<List<Section>> GetVenueSectionsAsync(string venueId, CancellationToken cancellationToken = default);
+        public Task<List<SectionDto>> GetVenueSectionsAsync(string venueId, CancellationToken cancellationToken = default);
     }
 }

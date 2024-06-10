@@ -9,8 +9,12 @@ namespace TicketingSystem.WebApi.Filters
     {
         public override void OnException(ExceptionContext context)
         {
-            if(context.Exception is BusinessLogicException bex && bex.Code == Common.Enums.ErrorCode.NotFound)
+            if(context.Exception is BusinessLogicException bex)
             {
+                int statusCode = bex.Code == Common.Enums.ErrorCode.NotFound ?
+                    (int)HttpStatusCode.NotFound
+                    : (int)HttpStatusCode.BadRequest;
+
                 var result = new ObjectResult(new
                 {
                     context.Exception.Message,
@@ -18,7 +22,7 @@ namespace TicketingSystem.WebApi.Filters
                     ExceptionType = context.Exception.GetType().FullName,
                 })
                 {
-                    StatusCode = (int)HttpStatusCode.NotFound
+                    StatusCode = statusCode
                 };
 
                 string message = $"BusinessLogic exception with NotFound code occured: {context.Exception}";

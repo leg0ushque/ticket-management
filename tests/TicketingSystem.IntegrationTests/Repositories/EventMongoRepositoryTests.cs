@@ -1,16 +1,15 @@
 ﻿using AutoFixture;
 using FluentAssertions;
-using System;
 using System.Threading.Tasks;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
 using Xunit;
 
-namespace TicketingSystem.IntegrationTests
+namespace TicketingSystem.IntegrationTests.Repositories
 {
     public class EventMongoRepositoryTests : IClassFixture<DatabaseFixture>
     {
-        private readonly IFixture _fixture;
+        private readonly Fixture _fixture;
         private readonly IMongoRepository<Event> _repository;
         private Event _testEntity;
 
@@ -88,9 +87,9 @@ namespace TicketingSystem.IntegrationTests
             deletedEntity.Should().BeNull();
         }
 
-        private async Task TearDown()
+        private Task TearDown()
         {
-            await _repository.DeleteAsync(_testEntity.Id);
+            return _repository.DeleteAsync(_testEntity.Id);
         }
     }
 }

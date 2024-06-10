@@ -11,7 +11,6 @@ using TicketingSystem.BusinessLogic.Models;
 using TicketingSystem.Common.Enums;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
-using static System.Collections.Specialized.BitVector32;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
