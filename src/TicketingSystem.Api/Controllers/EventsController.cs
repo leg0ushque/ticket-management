@@ -14,6 +14,8 @@ namespace TicketingSystem.WebApi.Controllers
         IEventService eventService,
         IEventSectionService eventSectionService) : ControllerBase
     {
+        private const int CacheSecondsDuration = 60;
+
         private readonly IEventService _eventService = eventService;
         private readonly IEventSectionService _eventSectionService = eventSectionService;
 
@@ -24,6 +26,7 @@ namespace TicketingSystem.WebApi.Controllers
         [HttpGet]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ResponseCache(Duration = CacheSecondsDuration, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<IActionResult> GetEvents()
         {
             var events = await _eventService.GetAllAsync();
@@ -38,6 +41,7 @@ namespace TicketingSystem.WebApi.Controllers
         [HttpGet]
         [Route("{eventId}/sections")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ResponseCache(Duration = CacheSecondsDuration, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<IActionResult> GetEventsSections([FromRoute] string eventId)
         {
             var eventSections = await _eventSectionService.GetSectionsByEventIdAsync(eventId);
@@ -55,6 +59,7 @@ namespace TicketingSystem.WebApi.Controllers
         [Route("{eventId}/sections/{sectionId}/seats")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ResponseCache(Duration = CacheSecondsDuration, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<IActionResult> GetFullSeats([FromRoute] string eventId, [FromRoute] string sectionId)
         {
             _ = await _eventService.GetByIdAsync(eventId);

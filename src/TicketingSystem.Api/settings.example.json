@@ -2,5 +2,9 @@
   "ConnectionStrings": {
     "connectionString": "<connection string here>"
   },
-  "databaseName": "TicketingSystemDb"
+  "databaseName": "TicketingSystemDb",
+  "CacheOptions": {
+    "ResponseCacheDuration": 60,
+    "SlidingExpiration": 1 // in minutes
+  }
 }

@@ -27,8 +27,5 @@ namespace TicketingSystem.BusinessLogic.Services
 
         Task<IReadOnlyCollection<TEntityDto>> FilterAsync(Expression<Func<TEntity, bool>> expression,
             CancellationToken cancellationToken = default);
-
-        Task<IReadOnlyCollection<TEntityDto>> FilterAsync<TField>(Expression<Func<TEntity, TField>> field, IEnumerable<TField> values,
-            CancellationToken cancellationToken = default);
     }
 }

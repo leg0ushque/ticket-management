@@ -1,11 +1,14 @@
 using AutoFixture;
 using AutoMapper;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Mapper;
+using TicketingSystem.BusinessLogic.Options;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
 using TicketingSystem.DataAccess.Entities;
@@ -41,7 +44,10 @@ namespace TicketingSystem.IntegrationTests
             });
             mapper = mapperConfig.CreateMapper();
 
-            _eventService = new EventService(_dbFixture.EventRepositoryInstance, mapper);
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var cacheOptions = Options.Create<CacheOptions>(new CacheOptions());
+
+            _eventService = new EventService(_dbFixture.EventRepositoryInstance, mapper, memoryCache, cacheOptions);
             _eventSectionService = new EventSectionService(_dbFixture.EventSectionRepositoryInstance, mapper);
 
             _paymentService = new PaymentService(_dbFixture.PaymentRepositoryInstance, mapper);
@@ -102,7 +108,7 @@ namespace TicketingSystem.IntegrationTests
                     .CreateMany(7).ToArray())
                 .CreateMany(3).ToList();
 
-            EventSectionsIds = await CreateEntities(_dbFixture.EventSectionRepositoryInstance, eventSections);
+            EventSectionsIds = await CreateEntities(_dbFixture.EventSectionRepositoryInstance, eventSections, ct);
         }
         private static async Task<List<string>> CreateEntities<TEntity>(
             IMongoRepository<TEntity> repository, IEnumerable<TEntity> entities, CancellationToken ct = default)

@@ -9,6 +9,8 @@ using System.IO;
 using System.Reflection;
 using TicketingSystem.BusinessLogic;
 using TicketingSystem.BusinessLogic.Mapper;
+using TicketingSystem.BusinessLogic.Options;
+using TicketingSystem.BusinessLogic.Services;
 
 namespace TicketingSystem.WebApi
 {
@@ -23,6 +25,11 @@ namespace TicketingSystem.WebApi
 
             var config = SetupConfiguration(env);
             builder.Services.AddSingleton<IConfiguration>(config);
+            builder.Services.AddOptions<CacheOptions>()
+                .Configure<IConfiguration>((settings, config) =>
+                {
+                    config.GetSection("CacheOptions").Bind(settings);
+                });
 
             var connectionString = config.GetConnectionString("connectionString");
             var databaseName = config.GetSection("databaseName").Value;

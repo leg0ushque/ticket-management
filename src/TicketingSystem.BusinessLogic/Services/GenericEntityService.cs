@@ -25,7 +25,7 @@ namespace TicketingSystem.BusinessLogic.Services
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="BusinessLogicException"></exception>
-        public Task CreateAsync(TEntityDto entity, CancellationToken cancellationToken = default)
+        public virtual Task CreateAsync(TEntityDto entity, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace TicketingSystem.BusinessLogic.Services
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="BusinessLogicException"></exception>
-        public async Task<IReadOnlyCollection<TEntityDto>> GetAllAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<IReadOnlyCollection<TEntityDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace TicketingSystem.BusinessLogic.Services
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="BusinessLogicException"></exception>
-        public async Task<TEntityDto> GetByIdAsync(string entityId, CancellationToken cancellationToken = default)
+        public virtual async Task<TEntityDto> GetByIdAsync(string entityId, CancellationToken cancellationToken = default)
         {
             var foundEntity = await GetEntityById(entityId, cancellationToken);
 
@@ -73,7 +73,7 @@ namespace TicketingSystem.BusinessLogic.Services
                 : _mapper.Map<TEntityDto>(foundEntity);
         }
 
-        public Task UpdateAsync(TEntityDto entity, CancellationToken cancellationToken = default)
+        public virtual Task UpdateAsync(TEntityDto entity, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -87,7 +87,7 @@ namespace TicketingSystem.BusinessLogic.Services
             }
         }
 
-        public Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, CancellationToken cancellationToken = default)
+        public virtual Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -99,7 +99,7 @@ namespace TicketingSystem.BusinessLogic.Services
             }
         }
 
-        public Task DeleteAsync(string entityId, CancellationToken cancellationToken = default)
+        public virtual Task DeleteAsync(string entityId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace TicketingSystem.BusinessLogic.Services
             }
         }
 
-        public async Task<IReadOnlyCollection<TEntityDto>> FilterAsync(Expression<Func<TEntity, bool>> expression,
+        public virtual async Task<IReadOnlyCollection<TEntityDto>> FilterAsync(Expression<Func<TEntity, bool>> expression,
             CancellationToken cancellationToken = default)
         {
             try
@@ -126,20 +126,7 @@ namespace TicketingSystem.BusinessLogic.Services
             }
         }
 
-        public async Task<IReadOnlyCollection<TEntityDto>> FilterAsync<TField>(Expression<Func<TEntity, TField>> field, IEnumerable<TField> values, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                return _mapper.Map<List<TEntityDto>>(await _repository.FilterAsync(field, values, cancellationToken))
-                    .AsReadOnly();
-            }
-            catch (Exception ex)
-            {
-                throw new BusinessLogicException(ex.Message, ex);
-            }
-        }
-
-        private async Task<TEntity> GetEntityById(string entityId, CancellationToken cancellationToken = default)
+        private protected async Task<TEntity> GetEntityById(string entityId, CancellationToken cancellationToken = default)
         {
             try
             {

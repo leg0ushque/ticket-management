@@ -11,6 +11,7 @@ namespace TicketingSystem.BusinessLogic
         {
             return services
                 .AddDataAccessServices(connectionString, databaseName)
+                .AddMemoryCache()
                 .RegisterServices();
         }
 
