@@ -15,7 +15,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
 {
     public class EventsControllerTests
     {
-        private readonly IFixture _fixture;
+        private readonly Fixture _fixture;
 
         private readonly List<EventDto> _events;
         private readonly List<EventSectionDto> _eventSections;

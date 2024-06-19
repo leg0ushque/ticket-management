@@ -18,7 +18,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
     {
         private const int ExistingEntitiesAmount = 5;
 
-        private readonly IFixture _fixture;
+        private readonly Fixture _fixture;
 
         private readonly List<VenueDto> _venues;
         private readonly List<SectionDto> _venueSections;
