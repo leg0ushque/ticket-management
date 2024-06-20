@@ -122,6 +122,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
             _eventSectionServiceMock.Setup(s => s.UpdateEventSeatsState(It.IsAny<string>(),
                     It.IsAny<SectionSeatsModel[]>(),
                     It.IsAny<EventSeatState>(),
+                    It.IsAny<EventSeatState>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
         }

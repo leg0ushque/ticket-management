@@ -1,6 +1,6 @@
 ﻿namespace TicketingSystem.DataAccess.Entities
 {
-    public interface IHasId
+    public interface IHasId : IHasVersion
     {
         public string Id { get; set; }
     }

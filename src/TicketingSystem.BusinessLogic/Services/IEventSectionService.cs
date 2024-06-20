@@ -10,7 +10,7 @@ namespace TicketingSystem.BusinessLogic.Services
 {
     public interface IEventSectionService : IService<EventSection, EventSectionDto>
     {
-        public Task UpdateEventSeatsState(string eventId, SectionSeatsModel[] sectionSeatsList, EventSeatState state,
+        public Task UpdateEventSeatsState(string eventId, SectionSeatsModel[] sectionSeatsList, EventSeatState fromState,EventSeatState toState,
             CancellationToken cancellationToken = default);
 
         public Task BookSeatsOfEvent(string eventId, SectionSeatsModel[] sectionSeatsList,

@@ -2,10 +2,8 @@
 
 namespace TicketingSystem.BusinessLogic.Dtos
 {
-    public class EventSeatDto : IDto
+    public class EventSeatDto : BaseDto, IDto
     {
-        public string Id { get; set; }
-
         public int SeatNumber { get; set; }
 
         public int RowNumber { get; set; }

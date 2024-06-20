@@ -17,6 +17,7 @@ namespace TicketingSystem.WebApi.Controllers
     [ApiController]
     [Route("[controller]")]
     [BusinessLogicExceptionFilter]
+    [OutdatedVersionExceptionFilter]
     public class OrdersController(
         IPaymentService paymentService,
         IEventSectionService eventSectionService)

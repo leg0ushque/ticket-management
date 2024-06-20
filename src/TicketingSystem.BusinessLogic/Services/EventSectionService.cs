@@ -17,7 +17,6 @@ namespace TicketingSystem.BusinessLogic.Services
     public class EventSectionService(IMongoRepository<EventSection> repository, IMapper mapper)
         : GenericEntityService<EventSection, EventSectionDto>(repository, mapper), IEventSectionService
     {
-        // TODO CHECK IF STATE UPDATED!
         public async Task<EventSeatDto> UpdateEventSeatState(string seatId, string eventId, EventSeatState state, CancellationToken cancellationToken = default)
         {
             var eventSection = await GetSectionBySeatIdAsync(seatId, eventId, cancellationToken);
@@ -79,10 +78,11 @@ namespace TicketingSystem.BusinessLogic.Services
         }
 
         public Task BookSeatsOfEvent(string eventId, SectionSeatsModel[] sectionSeatsList, CancellationToken cancellationToken = default)
-            => UpdateEventSeatsState(eventId, sectionSeatsList, EventSeatState.Booked, cancellationToken);
+            => UpdateEventSeatsState(eventId, sectionSeatsList,
+                EventSeatState.Available, EventSeatState.Booked,
+                cancellationToken);
 
-        // TODO CHECK IF WORKS!
-        public async Task UpdateEventSeatsState(string eventId, SectionSeatsModel[] sectionSeatsList, EventSeatState state,
+        public async Task UpdateEventSeatsState(string eventId, SectionSeatsModel[] sectionSeatsList, EventSeatState fromState, EventSeatState toState,
             CancellationToken cancellationToken = default)
         {
             var eventSections = await GetSectionsByEventIdAsync(eventId, cancellationToken)
@@ -98,10 +98,17 @@ namespace TicketingSystem.BusinessLogic.Services
                 {
                     var seat = sectionToUpdate.EventSeats.FirstOrDefault(s => s.Id == seatIdToUpdate);
 
-                    if (seat != null)
+                    if (seat is null)
                     {
-                        seat.State = state;
+                        throw new ArgumentException(message: $"Seat with Id {seatIdToUpdate} was not found in the section with Id {sectionToUpdate.Id}");
                     }
+
+                    if (seat.State != fromState)
+                    {
+                        throw new BusinessLogicException(message: $"Seat already has been updated");
+                    }
+
+                    seat.State = toState;
                 }
             }
 

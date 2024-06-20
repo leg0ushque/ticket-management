@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
+using TicketingSystem.WebApi.Filters;
 
 namespace TicketingSystem.WebApi.Controllers
 {
@@ -11,6 +12,7 @@ namespace TicketingSystem.WebApi.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
+    [OutdatedVersionExceptionFilter]
     public class PaymentsController(
         IPaymentService paymentService,
         IEventSectionService eventSectionService)
@@ -46,7 +48,7 @@ namespace TicketingSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CompletePayment([FromRoute] string paymentId)
         {
-            await UpdatePayment(paymentId, EventSeatState.Sold, PaymentState.Completed);
+            await UpdatePayment(paymentId, EventSeatState.Booked, EventSeatState.Sold, PaymentState.Completed);
 
             return Ok();
         }
@@ -62,12 +64,12 @@ namespace TicketingSystem.WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> FailPayment([FromRoute] string paymentId)
         {
-            await UpdatePayment(paymentId, EventSeatState.Available, PaymentState.Failed);
+            await UpdatePayment(paymentId, EventSeatState.Booked, EventSeatState.Available, PaymentState.Failed);
 
             return Ok();
         }
 
-        private async Task UpdatePayment(string paymentId, EventSeatState eventSeatsState, PaymentState paymentState)
+        private async Task UpdatePayment(string paymentId, EventSeatState oldState, EventSeatState newState, PaymentState paymentState)
         {
             var payment = await _paymentService.GetByIdAsync(paymentId);
 
@@ -76,7 +78,7 @@ namespace TicketingSystem.WebApi.Controllers
 
             foreach (var item in groupedCartItems)
             {
-                await _eventSectionService.UpdateEventSeatsState(item.EventId, item.SectionSeats, eventSeatsState);
+                await _eventSectionService.UpdateEventSeatsState(item.EventId, item.SectionSeats, oldState, newState);
             }
 
             await _paymentService.UpdatePaymentState(payment.Id, paymentState);

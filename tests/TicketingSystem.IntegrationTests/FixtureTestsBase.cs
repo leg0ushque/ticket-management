@@ -22,7 +22,7 @@ namespace TicketingSystem.IntegrationTests
         public readonly string CartId = Guid.NewGuid().ToString();
 
         protected readonly Fixture fixture;
-        private readonly DatabaseFixture _dbFixture;
+        protected readonly DatabaseFixture _dbFixture;
         private readonly IMapper mapper;
 
         protected readonly IEventService _eventService;
@@ -110,7 +110,8 @@ namespace TicketingSystem.IntegrationTests
 
             EventSectionsIds = await CreateEntities(_dbFixture.EventSectionRepositoryInstance, eventSections, ct);
         }
-        private static async Task<List<string>> CreateEntities<TEntity>(
+
+        protected static async Task<List<string>> CreateEntities<TEntity>(
             IMongoRepository<TEntity> repository, IEnumerable<TEntity> entities, CancellationToken ct = default)
             where TEntity : class, IHasId
         {
@@ -122,7 +123,7 @@ namespace TicketingSystem.IntegrationTests
             return entities.Select(x => x.Id).ToList();
         }
 
-        private static async Task RemoveEntities<TEntity>(
+        protected static async Task RemoveEntities<TEntity>(
             IMongoRepository<TEntity> repository, IEnumerable<string> entitiesIds, CancellationToken ct = default)
             where TEntity : class, IHasId
         {
