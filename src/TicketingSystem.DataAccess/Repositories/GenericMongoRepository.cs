@@ -18,12 +18,16 @@ namespace TicketingSystem.DataAccess.Repositories
 
         public abstract string _collectionName { get; }
 
+        protected readonly IMongoClient _client;
         protected readonly IMongoCollection<TEntity> _collection;
 
         protected GenericMongoRepository(IMongoDbFactory mongoDbFactory)
         {
+            _client = mongoDbFactory.Client;
             _collection = mongoDbFactory.GetCollection<TEntity>(_collectionName);
         }
+
+        public IMongoClient Client { get => _client; }
 
         public async Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {

@@ -23,7 +23,7 @@ namespace TicketingSystem.IntegrationTests
 
         protected readonly Fixture fixture;
         protected readonly DatabaseFixture _dbFixture;
-        private readonly IMapper mapper;
+        protected readonly IMapper _mapper;
 
         protected readonly IEventService _eventService;
         protected readonly IEventSectionService _eventSectionService;
@@ -42,20 +42,20 @@ namespace TicketingSystem.IntegrationTests
             {
                 mc.AddProfile(new BusinessLogicMappingProfile());
             });
-            mapper = mapperConfig.CreateMapper();
+            _mapper = mapperConfig.CreateMapper();
 
             var memoryCache = new MemoryCache(new MemoryCacheOptions());
             var cacheOptions = Options.Create<CacheOptions>(new CacheOptions());
 
-            _eventService = new EventService(_dbFixture.EventRepositoryInstance, mapper, memoryCache, cacheOptions);
-            _eventSectionService = new EventSectionService(_dbFixture.EventSectionRepositoryInstance, mapper);
+            _eventService = new EventService(_dbFixture.EventRepositoryInstance, _mapper, memoryCache, cacheOptions);
+            _eventSectionService = new EventSectionService(_dbFixture.EventSectionRepositoryInstance, _mapper);
 
-            _paymentService = new PaymentService(_dbFixture.PaymentRepositoryInstance, mapper);
-            _ticketService = new TicketService(_dbFixture.TicketRepositoryInstance, mapper);
-            _userService = new UserService(_dbFixture.UserRepositoryInstance, mapper);
+            _paymentService = new PaymentService(_dbFixture.PaymentRepositoryInstance, _mapper);
+            _ticketService = new TicketService(_dbFixture.TicketRepositoryInstance, _mapper);
+            _userService = new UserService(_dbFixture.UserRepositoryInstance, _mapper);
             _venueService = new VenueService(_dbFixture.VenueRepositoryInstance,
-                _dbFixture.SectionRepositoryInstance, mapper);
-            _sectionService = new SectionService(_dbFixture.SectionRepositoryInstance, mapper);
+                _dbFixture.SectionRepositoryInstance, _mapper);
+            _sectionService = new SectionService(_dbFixture.SectionRepositoryInstance, _mapper);
 
             EventsController = new EventsController(_eventService, _eventSectionService);
             PaymentsController = new PaymentsController(_paymentService, _eventSectionService);

@@ -78,7 +78,7 @@ namespace TicketingSystem.WebApi.Controllers
 
             foreach (var item in groupedCartItems)
             {
-                await _eventSectionService.UpdateEventSeatsState(item.EventId, item.SectionSeats, oldState, newState);
+                await _eventSectionService.UpdateEventSeatsStateAsync(item.EventId, item.SectionSeats, oldState, newState);
             }
 
             await _paymentService.UpdatePaymentState(payment.Id, paymentState);

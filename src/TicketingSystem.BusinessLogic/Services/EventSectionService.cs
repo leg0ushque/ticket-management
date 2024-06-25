@@ -77,12 +77,43 @@ namespace TicketingSystem.BusinessLogic.Services
                 : _mapper.Map<EventSectionDto>(eventSection);
         }
 
-        public Task BookSeatsOfEvent(string eventId, SectionSeatsModel[] sectionSeatsList, CancellationToken cancellationToken = default)
-            => UpdateEventSeatsState(eventId, sectionSeatsList,
-                EventSeatState.Available, EventSeatState.Booked,
-                cancellationToken);
+        public async Task ExecuteBookingTransactionAsync(List<EventSectionSeatsModel> groupedItems, CancellationToken cancellationToken = default)
+        {
+            using var session = await _repository.Client.StartSessionAsync(
+                cancellationToken: cancellationToken);
 
-        public async Task UpdateEventSeatsState(string eventId, SectionSeatsModel[] sectionSeatsList, EventSeatState fromState, EventSeatState toState,
+            session.StartTransaction();
+
+            try
+            {
+                foreach (var item in groupedItems)
+                {
+                    await UpdateEventSeatsStateAsync(item.EventId, item.SectionSeats,
+                        EventSeatState.Available, EventSeatState.Booked,
+                        cancellationToken);
+                }
+
+                await session.CommitTransactionAsync(cancellationToken);
+            }
+            catch (Exception)
+            {
+                await session.AbortTransactionAsync(cancellationToken);
+
+                throw;
+            }
+        }
+
+        public async Task BookSeatsOfEventAsync(List<EventSectionSeatsModel> groupedItems, CancellationToken cancellationToken = default)
+        {
+            foreach (var item in groupedItems)
+            {
+                await UpdateEventSeatsStateAsync(item.EventId, item.SectionSeats,
+                    EventSeatState.Available, EventSeatState.Booked,
+                    cancellationToken);
+            }
+        }
+
+        public async Task UpdateEventSeatsStateAsync(string eventId, SectionSeatsModel[] sectionSeatsList, EventSeatState fromState, EventSeatState toState,
             CancellationToken cancellationToken = default)
         {
             var eventSections = await GetSectionsByEventIdAsync(eventId, cancellationToken)
@@ -90,7 +121,7 @@ namespace TicketingSystem.BusinessLogic.Services
 
             var allSectionsToUpdate = eventSections.Where(es => sectionSeatsList.Any(x => x.SectionId == es.Id)).ToList();
 
-            foreach(var sectionSeats in sectionSeatsList)
+            foreach (var sectionSeats in sectionSeatsList)
             {
                 var sectionToUpdate = allSectionsToUpdate.Find(sec => sec.Id == sectionSeats.SectionId);
 

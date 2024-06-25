@@ -112,10 +112,7 @@ namespace TicketingSystem.WebApi.Controllers
             // Events with sections containing a list of seats to update
             var groupedCartItems = _paymentService.GetPaymentEventSeats(payment);
 
-            foreach (var item in groupedCartItems)
-            {
-                await _eventSectionService.BookSeatsOfEvent(item.EventId, item.SectionSeats);
-            }
+            await _eventSectionService.ExecuteBookingTransactionAsync(groupedCartItems);
 
             return Ok(payment.Id);
         }
