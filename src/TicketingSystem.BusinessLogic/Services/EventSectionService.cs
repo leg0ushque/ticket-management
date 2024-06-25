@@ -9,6 +9,7 @@ using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Exceptions;
 using TicketingSystem.BusinessLogic.Models;
 using TicketingSystem.Common.Enums;
+using TicketingSystem.Common.Exceptions;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
 
@@ -136,7 +137,7 @@ namespace TicketingSystem.BusinessLogic.Services
 
                     if (seat.State != fromState)
                     {
-                        throw new BusinessLogicException(message: $"Seat already has been updated");
+                        throw new OutdatedVersionException(message: $"Seat already has been updated");
                     }
 
                     seat.State = toState;

@@ -180,7 +180,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
             _eventSectionServiceMock.Verify(s =>
                     s.BookSeatsOfEventAsync(It.IsAny<List<EventSectionSeatsModel>>(),
                         It.IsAny<CancellationToken>()),
-                Times.Exactly(_paymentSections.Count));
+                Times.Once); // the whole collection is sent into the method instead of separate calls
 
             var responseObject = response as OkObjectResult;
             responseObject.StatusCode.Should().Be(StatusCodes.Status200OK);
