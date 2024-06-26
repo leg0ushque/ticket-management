@@ -85,21 +85,14 @@ namespace TicketingSystem.DataAccess.Repositories
             }
         }
 
-        public async Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, CancellationToken cancellationToken = default)
+        public async Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, long version,
+            CancellationToken cancellationToken = default)
         {
-            var item = await _collection.FindAsync(Builders<TEntity>.Filter.Eq("_id", id),
-                cancellationToken: cancellationToken);
-
-            var entity = await item.FirstOrDefaultAsync(cancellationToken);
-
-            var version = entity.Version;
             var filter = Builders<TEntity>.Filter.Where(e => e.Id == id && e.Version == version);
-
-            entity.Version++;
 
             var update = Builders<TEntity>.Update
                     .Set(field, newValue)
-                    .Set(x => x.Version, entity.Version);
+                    .Inc(x => x.Version, 1);
 
             var result = await _collection.UpdateOneAsync(filter, update,
                 cancellationToken: cancellationToken);

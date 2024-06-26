@@ -13,7 +13,7 @@ namespace TicketingSystem.DataAccess.Repositories
     {
         public IMongoClient Client { get; }
 
-        public Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue,
+        public Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, long version,
             CancellationToken cancellationToken = default);
 
         public Task<List<TEntity>> FilterAsync(Expression<Func<TEntity, bool>> expression,

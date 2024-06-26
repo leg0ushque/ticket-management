@@ -1,12 +1,10 @@
 ﻿using AutoFixture;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Dtos;
@@ -14,7 +12,6 @@ using TicketingSystem.Common.Enums;
 using TicketingSystem.Common.Exceptions;
 using TicketingSystem.DataAccess.Entities;
 using Xunit;
-using static MongoDB.Driver.WriteConcern;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 namespace TicketingSystem.IntegrationTests.Concurrency
@@ -23,49 +20,44 @@ namespace TicketingSystem.IntegrationTests.Concurrency
     public class ConcurrencyTests(DatabaseFixture fixture)
         : FixtureTestsBase(fixture), IClassFixture<DatabaseFixture>
     {
+        private ConcurrentBag<string> successfulRequests = new();
+        private ConcurrentBag<string> failedRequests = new();
+
         [Fact]
         public async Task GivenBookingTransaction_WhenExceptionOccured_ShouldBeRollbacked()
         {
             // Arrange
-            var payments = await SetupPessimisticPayments();
-            var seatsForRollback = payments[1].CartItems.Select(x => x.EventSeatId).ToList();
+            var payments = await SetupPessimisticPayments(); // p1: #1-5, p2: #3
+            var seatsForRollback = payments[0].CartItems.Select(x => x.EventSeatId).ToList();
 
-            var cartIds = payments.Select(p => p.CartId).ToList();
-
-            // Book seat #2
+            // Book seat #3
             var secondGroupedSeatsInfo = _paymentService.GetPaymentEventSeats(
-                _mapper.Map<PaymentDto>(payments[0]));
+                _mapper.Map<PaymentDto>(payments[1]));
             await _eventSectionService.ExecuteBookingTransactionAsync(secondGroupedSeatsInfo);
 
             var updatedSection = await _eventSectionService.GetByIdAsync(EventSectionsIds[0]);
-            var updatedSeat = updatedSection.EventSeats.FirstOrDefault(es
-                => es.Id == payments[0].CartItems[0].EventSeatId);
+            var bookedSeat = updatedSection.EventSeats.FirstOrDefault(es
+                => es.Id == payments[1].CartItems[0].EventSeatId);
 
-            updatedSeat.State.Should().Be(EventSeatState.Booked);
+            bookedSeat.State.Should().Be(EventSeatState.Booked);
 
             // Act
 
             // Book seats #1-5
             var firstGroupedSeatsInfo = _paymentService.GetPaymentEventSeats(
                 _mapper.Map<PaymentDto>(payments[0]));
-            var action = async () => await _eventSectionService.ExecuteBookingTransactionAsync(firstGroupedSeatsInfo);
+            var action = () => _eventSectionService.ExecuteBookingTransactionAsync(firstGroupedSeatsInfo);
 
             // Assert
 
             await action.Should().ThrowAsync<OutdatedVersionException>();
 
+            var firstPaymentSeats = payments[0].CartItems.Select(ci => ci.EventSeatId);
             var notUpdatedSection = await _eventSectionService.GetByIdAsync(EventSectionsIds[0]);
-            var notUpdatedSeats = notUpdatedSection.EventSeats.FirstOrDefault(es
-                => es.Id == payments[0].CartItems[0].EventSeatId);
+            var notUpdatedSeats = notUpdatedSection.EventSeats.Where(es
+                => firstPaymentSeats.Any(x => x == es.Id) && es.Id != bookedSeat.Id);
 
-            updatedSeat.State.Should().Be(EventSeatState.Booked);
-
-            foreach (var seatId in seatsForRollback)
-            {
-                var seat = updatedSection.EventSeats.FirstOrDefault(es
-                    => es.Id == seatId);
-                seat.State.Should().Be(EventSeatState.Available);
-            }
+            notUpdatedSeats.All(s => s.State == EventSeatState.Available).Should().BeTrue();
 
             await TearDown();
         }
@@ -80,44 +72,39 @@ namespace TicketingSystem.IntegrationTests.Concurrency
 
             var cartIds = payments.Select(p => p.CartId).ToList();
 
-            var successfulRequests = new ConcurrentBag<string>();
-            var failedRequests = new ConcurrentBag<string>();
-
             // Act
+            var tasks = new List<Task>();
 
-            Parallel.For(0, requestsAmount,
-                (i) =>
-                {
-                    string cartId = cartIds[i];
+            for (int i = 0; i < requestsAmount; i++)
+            {
+                tasks.Add(ExecuteEndpointCall(cartIds[i]));
+            }
+            //Parallel.For(0, requestsAmount, (i) =>
+            //    tasks.Add(ExecuteEndpointCall(cartIds[i])));
 
-                    try
-                    {
-                        // BookSeatsInCart
-                        // OR
-                        // BookSeatsInCartConcurrently
-                        _ = OrdersController.BookSeatsInCartConcurrently(cartId).Result;
-
-                        successfulRequests.Add(cartId);
-                    }
-                    catch (AggregateException ae)
-                    {
-                        if (ae.InnerException is OutdatedVersionException)
-                        {
-                            failedRequests.Add(cartId);
-                        }
-                    }
-                }
-            );
-
-            // Assert
-
-            Console.WriteLine($"Success - {successfulRequests.Count()}");
-            Console.WriteLine($"Fail - {failedRequests.Count()}");
+            await Task.WhenAll(tasks);
 
             successfulRequests.Should().HaveCount(1);
             failedRequests.Should().HaveCount(requestsAmount - 1);
 
             await TearDown();
+        }
+
+        private async Task ExecuteEndpointCall(string cartId)
+        {
+            try
+            {
+                await OrdersController.BookSeatsInCartConcurrently(cartId);
+                successfulRequests.Add(cartId);
+            }
+            catch (MongoCommandException)
+            {
+                failedRequests.Add(cartId);
+            }
+            catch (OutdatedVersionException)
+            {
+                failedRequests.Add(cartId);
+            }
         }
 
         private async Task<List<Payment>> SetupPessimisticPayments(CancellationToken ct = default)
@@ -132,6 +119,7 @@ namespace TicketingSystem.IntegrationTests.Concurrency
                 [
                 eventSection.EventSeats[0],
                 eventSection.EventSeats[1],
+                eventSection.EventSeats[2],
                 eventSection.EventSeats[3],
                 eventSection.EventSeats[4],
                 ];

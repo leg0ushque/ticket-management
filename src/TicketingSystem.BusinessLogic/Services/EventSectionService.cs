@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,11 @@ using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
-    public class EventSectionService(IMongoRepository<EventSection> repository, IMapper mapper)
+    public class EventSectionService(IEventSectionRepository repository, IMapper mapper)
         : GenericEntityService<EventSection, EventSectionDto>(repository, mapper), IEventSectionService
     {
+        private IEventSectionRepository _eventSectionRepository = repository;
+
         public async Task<EventSeatDto> UpdateEventSeatState(string seatId, string eventId, EventSeatState state, CancellationToken cancellationToken = default)
         {
             var eventSection = await GetSectionBySeatIdAsync(seatId, eventId, cancellationToken);
@@ -29,7 +32,8 @@ namespace TicketingSystem.BusinessLogic.Services
             var eventSeat = eventSection.EventSeats.FirstOrDefault(s => s.Id == seatId);
             eventSeat!.State = state;
 
-            await _repository.UpdateAsync(eventSection.Id, es => es.EventSeats, _mapper.Map<EventSeat[]>(eventSection.EventSeats), cancellationToken);
+            await _repository.UpdateAsync(eventSection.Id, es => es.EventSeats, _mapper.Map<EventSeat[]>(eventSection.EventSeats),
+                eventSection.Version, cancellationToken);
 
             eventSeat.EventSectionId = eventSection.Id;
             eventSeat.EventSectionNumber = eventSection.Number;
@@ -89,7 +93,7 @@ namespace TicketingSystem.BusinessLogic.Services
             {
                 foreach (var item in groupedItems)
                 {
-                    await UpdateEventSeatsStateAsync(item.EventId, item.SectionSeats,
+                    await UpdateEventSeatsStateAsync(session, item.EventId, item.SectionSeats,
                         EventSeatState.Available, EventSeatState.Booked,
                         cancellationToken);
                 }
@@ -135,9 +139,44 @@ namespace TicketingSystem.BusinessLogic.Services
                         throw new ArgumentException(message: $"Seat with Id {seatIdToUpdate} was not found in the section with Id {sectionToUpdate.Id}");
                     }
 
+                    seat.State = toState;
+                }
+            }
+
+            foreach (var section in allSectionsToUpdate)
+            {
+                await _repository.UpdateAsync(section.Id,
+                    es => es.EventSeats, _mapper.Map<EventSeat[]>(section.EventSeats),
+                    section.Version,
+                    cancellationToken);
+            }
+        }
+
+        public async Task UpdateEventSeatsStateAsync(IClientSessionHandle session, string eventId, SectionSeatsModel[] sectionSeatsList,
+            EventSeatState fromState, EventSeatState toState,
+            CancellationToken cancellationToken = default)
+        {
+            var eventSections = await GetSectionsByEventIdAsync(eventId, cancellationToken)
+                ?? throw new BusinessLogicException($"No sections were found for event with ID {eventId}", null, ErrorCode.NotFound);
+
+            var allSectionsToUpdate = eventSections.Where(es => sectionSeatsList.Any(x => x.SectionId == es.Id)).ToList();
+
+            foreach (var sectionSeats in sectionSeatsList)
+            {
+                var sectionToUpdate = allSectionsToUpdate.Find(sec => sec.Id == sectionSeats.SectionId);
+
+                foreach (var seatIdToUpdate in sectionSeats.SeatIds)
+                {
+                    var seat = sectionToUpdate.EventSeats.FirstOrDefault(s => s.Id == seatIdToUpdate);
+
+                    if (seat is null)
+                    {
+                        throw new ArgumentException(message: $"Seat with Id {seatIdToUpdate} was not found in the section with Id {sectionToUpdate.Id}");
+                    }
+
                     if (seat.State != fromState)
                     {
-                        throw new OutdatedVersionException(message: $"Seat already has been updated");
+                        throw new OutdatedVersionException(message: $"Seat with Id {seatIdToUpdate} has outdated State");
                     }
 
                     seat.State = toState;
@@ -146,7 +185,9 @@ namespace TicketingSystem.BusinessLogic.Services
 
             foreach (var section in allSectionsToUpdate)
             {
-                await _repository.UpdateAsync(section.Id, es => es.EventSeats, _mapper.Map<EventSeat[]>(section.EventSeats), cancellationToken);
+                await _eventSectionRepository.UpdateAsync(session, section.Id,
+                    es => es.EventSeats, _mapper.Map<EventSeat[]>(section.EventSeats),
+                    section.Version, cancellationToken);
             }
         }
     }

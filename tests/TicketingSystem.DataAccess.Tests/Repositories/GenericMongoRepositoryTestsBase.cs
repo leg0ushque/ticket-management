@@ -238,10 +238,10 @@ namespace TicketingSystem.UnitTests
         [Fact]
         public async Task UpdateAsync_Field_WhenInvoked_ShouldCallFindOneAndUpdateAsync()
         {
-            var id = entities.FirstOrDefault().Id;
+            var entity = entities.FirstOrDefault();
             Expression<Func<TEntity, string>> fieldExpression = x => x.Id;
 
-            await repository.UpdateAsync(id, fieldExpression, newValue);
+            await repository.UpdateAsync(entity.Id, fieldExpression, newValue, entity.Version);
 
             mongoCollectionMock.Verify(x =>
                     x.UpdateOneAsync(
