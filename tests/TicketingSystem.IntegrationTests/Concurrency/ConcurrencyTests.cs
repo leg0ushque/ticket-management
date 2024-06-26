@@ -28,7 +28,6 @@ namespace TicketingSystem.IntegrationTests.Concurrency
         {
             // Arrange
             var payments = await SetupPessimisticPayments(); // p1: #1-5, p2: #3
-            var seatsForRollback = payments[0].CartItems.Select(x => x.EventSeatId).ToList();
 
             // Book seat #3
             var secondGroupedSeatsInfo = _paymentService.GetPaymentEventSeats(
@@ -75,12 +74,12 @@ namespace TicketingSystem.IntegrationTests.Concurrency
             // Act
             var tasks = new List<Task>();
 
-            for (int i = 0; i < requestsAmount; i++)
-            {
-                tasks.Add(ExecuteEndpointCall(cartIds[i]));
-            }
-            //Parallel.For(0, requestsAmount, (i) =>
-            //    tasks.Add(ExecuteEndpointCall(cartIds[i])));
+            //for (int i = 0; i < requestsAmount; i++)
+            //{
+            //    tasks.Add(ExecuteEndpointCall(cartIds[i]));
+            //}
+            Parallel.For(0, requestsAmount, (i) =>
+                tasks.Add(ExecuteEndpointCall(cartIds[i])));
 
             await Task.WhenAll(tasks);
 
