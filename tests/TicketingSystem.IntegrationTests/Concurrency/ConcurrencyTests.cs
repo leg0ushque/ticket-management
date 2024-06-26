@@ -194,7 +194,7 @@ namespace TicketingSystem.IntegrationTests.Concurrency
             var eventSeat = eventSection.EventSeats.FirstOrDefault();
 
             var paymentsToCreate = fixture.Build<Payment>()
-                .With(p => p.CartId, Guid.NewGuid().ToString())
+                .With(p => p.CartId)
                 .With(p => p.State, PaymentState.InProgress)
                 .With(p => p.LastUpdatedOn, DateTime.Now)
                 .With(p => p.CartItems,
