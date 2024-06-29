@@ -12,16 +12,17 @@ namespace TicketingSystem.Messaging.Consumer
         private readonly ILogger _logger;
         private readonly IOptions<KafkaOptions> _kafkaOptions;
         private readonly IConsumerProvider _consumerProvider;
-        private readonly IProcessingService _processingService;
+        private readonly IMessageHandler _handler;
 
-        public KafkaConsumer(IOptions<KafkaOptions> kafkaOptions,
+        public KafkaConsumer(IMessageHandler handler,
+            IOptions<KafkaOptions> kafkaOptions,
                              IConsumerProvider consumerProvider,
                              ILogger logger)
         {
             _kafkaOptions = kafkaOptions;
             _consumerProvider = consumerProvider;
             _logger = logger;
-            _processingService = processingService;
+            _handler = handler;
         }
 
         public void Listen()
@@ -38,7 +39,7 @@ namespace TicketingSystem.Messaging.Consumer
 
                     _logger.Information("Consumed message with key {Key}", consumeResult.Message.Key);
 
-                    _processingService.AddMessage(result);
+                    _handler.Handle(result.Value);
                 }
                 catch (Exception e)
                 {

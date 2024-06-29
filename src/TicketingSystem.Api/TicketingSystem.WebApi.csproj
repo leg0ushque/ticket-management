@@ -30,6 +30,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\TicketingSystem.BusinessLogic\TicketingSystem.BusinessLogic.csproj" />
+		<ProjectReference Include="..\TicketingSystem.Messaging\TicketingSystem.Messaging.csproj" />
 	</ItemGroup>
 
 </Project>

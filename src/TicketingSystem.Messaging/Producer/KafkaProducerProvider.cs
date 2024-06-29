@@ -1,12 +1,6 @@
 ﻿using com.ticketingSystem;
 using Confluent.Kafka;
 using Confluent.SchemaRegistry.Serdes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TicketingSystem.Messaging.Schema;
 
 namespace TicketingSystem.Messaging.Producer
 {
@@ -16,7 +10,7 @@ namespace TicketingSystem.Messaging.Producer
 
         public IProducer<string, MessageValue> Producer { get; }
 
-        public KafkaProducerProvider(KafkaConfigurationProvider config, IKafkaSchemaProvider schemaProvider)
+        public KafkaProducerProvider(KafkaConfigurationProvider config)
         {
             var avroSerializerConfig = new AvroSerializerConfig
             {

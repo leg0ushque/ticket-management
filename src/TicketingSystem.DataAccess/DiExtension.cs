@@ -17,7 +17,8 @@ namespace TicketingSystem.DataAccess
                 .AddTransient<IMongoRepository<Ticket>, TicketRepository>()
                 .AddTransient<IMongoRepository<User>, UserRepository>()
                 .AddTransient<IMongoRepository<Venue>, VenueRepository>()
-                .AddTransient<IMongoRepository<Section>, SectionRepository>();
+                .AddTransient<IMongoRepository<Section>, SectionRepository>()
+                .AddTransient<IMongoRepository<Notification>, NotificationRepository>();
         }
     }
 }

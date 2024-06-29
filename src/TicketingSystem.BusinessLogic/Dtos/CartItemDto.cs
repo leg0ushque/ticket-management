@@ -1,4 +1,6 @@
-﻿namespace TicketingSystem.BusinessLogic.Dtos
+﻿using TicketingSystem.DataAccess.Entities;
+
+namespace TicketingSystem.BusinessLogic.Dtos
 {
     public class CartItemDto : BaseDto, IDto
     {

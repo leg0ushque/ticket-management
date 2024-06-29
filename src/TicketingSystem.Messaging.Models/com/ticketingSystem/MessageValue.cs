@@ -16,13 +16,14 @@ namespace com.ticketingSystem
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("avrogen", "1.11.3")]
 	public partial class MessageValue : global::Avro.Specific.ISpecificRecord
 	{
-		public static global::Avro.Schema _SCHEMA = global::Avro.Schema.Parse(@"{""type"":""record"",""name"":""MessageValue"",""namespace"":""com.ticketingSystem"",""fields"":[{""name"":""Id"",""type"":""string""},{""name"":""Operation"",""type"":""int""},{""name"":""Timestamp"",""default"":0,""type"":[{""type"":""long"",""logicalType"":""timestamp-millis""},""null""]},{""name"":""CustomerEmail"",""type"":""string""},{""name"":""CustomerName"",""type"":""string""},{""name"":""OrderAmount"",""type"":{""type"":""bytes"",""logicalType"":""decimal"",""precision"":4,""scale"":2}},{""name"":""OrderSummary"",""type"":""string""}]}");
+		public static global::Avro.Schema _SCHEMA = global::Avro.Schema.Parse(@"{""type"":""record"",""name"":""MessageValue"",""namespace"":""com.ticketingSystem"",""fields"":[{""name"":""Id"",""type"":""string""},{""name"":""TrackingId"",""type"":""string""},{""name"":""Operation"",""type"":""int""},{""name"":""Timestamp"",""default"":0,""type"":[{""type"":""long"",""logicalType"":""timestamp-millis""},""null""]},{""name"":""CustomerEmail"",""type"":""string""},{""name"":""CustomerName"",""type"":""string""},{""name"":""OrderAmount"",""type"":""double""},{""name"":""OrderSummary"",""type"":""string""}]}");
 		private string _Id;
+		private string _TrackingId;
 		private int _Operation;
 		private System.Nullable<System.DateTime> _Timestamp;
 		private string _CustomerEmail;
 		private string _CustomerName;
-		private Avro.AvroDecimal _OrderAmount;
+		private double _OrderAmount;
 		private string _OrderSummary;
 		public virtual global::Avro.Schema Schema
 		{
@@ -40,6 +41,17 @@ namespace com.ticketingSystem
 			set
 			{
 				this._Id = value;
+			}
+		}
+		public string TrackingId
+		{
+			get
+			{
+				return this._TrackingId;
+			}
+			set
+			{
+				this._TrackingId = value;
 			}
 		}
 		public int Operation
@@ -86,7 +98,7 @@ namespace com.ticketingSystem
 				this._CustomerName = value;
 			}
 		}
-		public Avro.AvroDecimal OrderAmount
+		public double OrderAmount
 		{
 			get
 			{
@@ -113,12 +125,13 @@ namespace com.ticketingSystem
 			switch (fieldPos)
 			{
 			case 0: return this.Id;
-			case 1: return this.Operation;
-			case 2: return this.Timestamp;
-			case 3: return this.CustomerEmail;
-			case 4: return this.CustomerName;
-			case 5: return this.OrderAmount;
-			case 6: return this.OrderSummary;
+			case 1: return this.TrackingId;
+			case 2: return this.Operation;
+			case 3: return this.Timestamp;
+			case 4: return this.CustomerEmail;
+			case 5: return this.CustomerName;
+			case 6: return this.OrderAmount;
+			case 7: return this.OrderSummary;
 			default: throw new global::Avro.AvroRuntimeException("Bad index " + fieldPos + " in Get()");
 			};
 		}
@@ -127,12 +140,13 @@ namespace com.ticketingSystem
 			switch (fieldPos)
 			{
 			case 0: this.Id = (System.String)fieldValue; break;
-			case 1: this.Operation = (System.Int32)fieldValue; break;
-			case 2: this.Timestamp = (System.Nullable<System.DateTime>)fieldValue; break;
-			case 3: this.CustomerEmail = (System.String)fieldValue; break;
-			case 4: this.CustomerName = (System.String)fieldValue; break;
-			case 5: this.OrderAmount = (Avro.AvroDecimal)fieldValue; break;
-			case 6: this.OrderSummary = (System.String)fieldValue; break;
+			case 1: this.TrackingId = (System.String)fieldValue; break;
+			case 2: this.Operation = (System.Int32)fieldValue; break;
+			case 3: this.Timestamp = (System.Nullable<System.DateTime>)fieldValue; break;
+			case 4: this.CustomerEmail = (System.String)fieldValue; break;
+			case 5: this.CustomerName = (System.String)fieldValue; break;
+			case 6: this.OrderAmount = (System.Double)fieldValue; break;
+			case 7: this.OrderSummary = (System.String)fieldValue; break;
 			default: throw new global::Avro.AvroRuntimeException("Bad index " + fieldPos + " in Put()");
 			};
 		}

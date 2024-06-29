@@ -13,6 +13,9 @@ using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
+using TicketingSystem.Messaging;
+using TicketingSystem.Messaging.Options;
+using TicketingSystem.Messaging.Producer;
 using TicketingSystem.WebApi.Controllers;
 
 namespace TicketingSystem.IntegrationTests
@@ -32,6 +35,7 @@ namespace TicketingSystem.IntegrationTests
         protected readonly IUserService _userService;
         protected readonly IVenueService _venueService;
         protected readonly ISectionService _sectionService;
+        protected readonly INotificationService _notificationService;
 
         public FixtureTestsBase(DatabaseFixture dbFixture)
         {
@@ -56,10 +60,25 @@ namespace TicketingSystem.IntegrationTests
             _venueService = new VenueService(_dbFixture.VenueRepositoryInstance,
                 _dbFixture.SectionRepositoryInstance, _mapper);
             _sectionService = new SectionService(_dbFixture.SectionRepositoryInstance, _mapper);
+            _notificationService = new NotificationService(_dbFixture.NotificationRepositoryInstance, _mapper);
+
+            var kafkaOptions = Options.Create<KafkaOptions>(
+                new KafkaOptions
+                {
+                    BootstrapServer = "localhost:9092",
+                    ClientId = "processing",
+                    Topic = "ticketing-emails"
+                });
+
+            var kafkaConfigProvider = new KafkaConfigurationProvider(kafkaOptions);
+            var producerProvider = new KafkaProducerProvider(kafkaConfigProvider);
+            IKafkaProducer kafkaProducer = new KafkaProducer(producerProvider, kafkaOptions, null);
+
+            var kafkaNotificationService = new KafkaNotificationService(kafkaProducer, _notificationService, _eventService);
 
             EventsController = new EventsController(_eventService, _eventSectionService);
-            PaymentsController = new PaymentsController(_paymentService, _eventSectionService);
-            OrdersController = new OrdersController(_paymentService, _eventSectionService);
+            PaymentsController = new PaymentsController(kafkaNotificationService, _paymentService, _eventSectionService);
+            OrdersController = new OrdersController(kafkaNotificationService, _paymentService, _eventSectionService);
         }
 
         public EventsController EventsController { get; set; }

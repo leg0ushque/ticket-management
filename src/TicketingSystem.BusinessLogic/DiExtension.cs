@@ -24,7 +24,8 @@ namespace TicketingSystem.BusinessLogic
                 .AddTransient<ISectionService, SectionService>()
                 .AddTransient<ITicketService, TicketService>()
                 .AddTransient<IUserService, UserService>()
-                .AddTransient<IVenueService, VenueService>();
+                .AddTransient<IVenueService, VenueService>()
+                .AddTransient<INotificationService, NotificationService>();
         }
     }
 }

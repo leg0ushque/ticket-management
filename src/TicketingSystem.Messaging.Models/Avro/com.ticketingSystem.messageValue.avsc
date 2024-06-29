@@ -8,6 +8,10 @@
       "type": "string"
     },
     {
+      "name": "TrackingId",
+      "type": "string"
+    },
+    {
       "name": "Operation",
       "type": "int"
     },
@@ -32,12 +36,7 @@
     },
     {
       "name": "OrderAmount",
-      "type": {
-        "type": "bytes",
-        "logicalType": "decimal",
-        "precision": 4,
-        "scale": 2
-      }
+      "type": "double"
     },
     {
       "name": "OrderSummary",

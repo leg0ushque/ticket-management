@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System;
 using System.IO;
 using System.Reflection;
@@ -11,6 +12,9 @@ using TicketingSystem.BusinessLogic;
 using TicketingSystem.BusinessLogic.Mapper;
 using TicketingSystem.BusinessLogic.Options;
 using TicketingSystem.BusinessLogic.Services;
+using TicketingSystem.Messaging;
+using TicketingSystem.Messaging.Options;
+using TicketingSystem.Messaging.Producer;
 
 namespace TicketingSystem.WebApi
 {
@@ -41,6 +45,18 @@ namespace TicketingSystem.WebApi
             builder.Services.AddControllers();
 
             builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddOptions<KafkaOptions>()
+                .Bind(config.GetSection(KafkaOptions.ConfigurationSection));
+
+            builder.Services.AddTransient<KafkaConfigurationProvider>();
+            builder.Services.AddTransient<IProducerProvider, KafkaProducerProvider>();
+            builder.Services.AddTransient<IKafkaProducer, KafkaProducer>();
+            builder.Services.AddTransient<IKafkaNotificationService, KafkaNotificationService>();
+
+            /* configure serilog here */
+
+            builder.Services.AddSerilog();
 
             builder.Services.AddSwaggerGen(config =>
             {

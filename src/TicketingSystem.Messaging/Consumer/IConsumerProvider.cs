@@ -1,5 +1,6 @@
 ﻿using com.ticketingSystem;
 using Confluent.Kafka;
+using System;
 
 namespace TicketingSystem.Messaging.Consumer
 {

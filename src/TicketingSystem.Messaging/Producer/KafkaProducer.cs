@@ -35,7 +35,7 @@ namespace TicketingSystem.Messaging.Producer
                     Value = message.Value
                 };
 
-                _logger.Information("Trying to produce a message with filename {Filename}", message.Value.FileName);
+                _logger.Information("Trying to produce a message for customer with email {Email}", message.Value.CustomerEmail);
 
                 await producer.ProduceAsync(_kafkaOptions.Value.Topic, confluentKafkaMessage);
 
@@ -44,8 +44,8 @@ namespace TicketingSystem.Messaging.Producer
 
             catch (Exception e)
             {
-                _logger.Error(e.ToString());
-                _logger.Error("Position:{Position}, Content Size: {ContentLength}", message.Value.Position, message.Value.Content.Length);
+                _logger.Error(e.Message);
+                _logger.Error("Customer email:{Email}, summary '{Summary}'", message.Value.CustomerEmail, message.Value.OrderSummary);
             }
 
         }

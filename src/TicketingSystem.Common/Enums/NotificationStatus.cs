@@ -1,4 +1,4 @@
-﻿namespace TicketingSystem.NotificationHandlerApp.Models
+﻿namespace TicketingSystem.Common.Enums
 {
     public enum NotificationStatus
     {

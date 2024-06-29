@@ -1,6 +1,5 @@
 ﻿using com.ticketingSystem;
 using Confluent.Kafka;
-using TicketingSystem.Messaging.Schema;
 
 namespace TicketingSystem.Messaging.Consumer
 {
@@ -10,7 +9,7 @@ namespace TicketingSystem.Messaging.Consumer
 
         public IConsumer<string, MessageValue> Consumer { get; }
 
-        public KafkaConsumerProvider(KafkaConfigurationProvider config, IKafkaSchemaProvider schemaProvider)
+        public KafkaConsumerProvider(KafkaConfigurationProvider config)
         {
             Consumer = new ConsumerBuilder<string, MessageValue>(config.ConsumerConfiguration)
                 .SetKeyDeserializer(new NewtonsoftKeyDeserializer<string>())
