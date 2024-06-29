@@ -2,10 +2,8 @@
 
 namespace TicketingSystem.BusinessLogic.Dtos
 {
-    public class UserDto : IDto
+    public class UserDto : BaseDto, IDto
     {
-        public string Id { get; set; }
-
         public string FirstName { get; set; }
 
         public string LastName { get; set; }

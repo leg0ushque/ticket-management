@@ -116,11 +116,11 @@ namespace TicketingSystem.BusinessLogic.Services
             }
         }
 
-        public override Task UpdateAsync<TField>(string id, Expression<Func<Event, TField>> field, TField newValue, CancellationToken cancellationToken = default)
+        public override Task UpdateAsync<TField>(string id, Expression<Func<Event, TField>> field, TField newValue, long version, CancellationToken cancellationToken = default)
         {
             try
             {
-                return _repository.UpdateAsync(id, field, newValue, cancellationToken);
+                return _repository.UpdateAsync(id, field, newValue, version, cancellationToken);
             }
             catch (Exception ex)
             {

@@ -70,13 +70,16 @@ namespace TicketingSystem.UnitTests
 
             // UPDATE setups
 
+            var replaceOneResultMock = new Mock<ReplaceOneResult>();
+            replaceOneResultMock.SetupGet(r => r.ModifiedCount).Returns(1);
+
             mongoCollectionMock.Setup(x =>
                 x.ReplaceOneAsync(
                     It.IsAny<FilterDefinition<TEntity>>(),
                     It.IsAny<TEntity>(),
                     It.IsAny<ReplaceOptions>(),
                     It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new Mock<ReplaceOneResult>().Object))
+                .Returns(Task.FromResult(replaceOneResultMock.Object))
                 .Callback<FilterDefinition<TEntity>, TEntity, ReplaceOptions, CancellationToken>((filter, e, options, ct) =>
                 {
                     entities.RemoveAll(x => x.Id == entities.FirstOrDefault().Id);
@@ -87,16 +90,20 @@ namespace TicketingSystem.UnitTests
 
             var updatedEntity = entities.FirstOrDefault();
 
+            var updateResultMock = new Mock<UpdateResult>();
+            updateResultMock.SetupGet(r => r.ModifiedCount).Returns(1);
+
             mongoCollectionMock.Setup(x =>
-                    x.FindOneAndUpdateAsync(
+                    x.UpdateOneAsync(
                         It.IsAny<FilterDefinition<TEntity>>(),
                         It.IsAny<UpdateDefinition<TEntity>>(),
-                        It.IsAny<FindOneAndUpdateOptions<TEntity>>(),
+                        It.IsAny<UpdateOptions>(),
                         It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(updatedEntity))
+                .Returns(Task.FromResult(updateResultMock.Object))
                 .Callback(() =>
                     {
                         updatedEntity.Id = newValue;
+                        updatedEntity.Version += 1;
                     });
 
             // DELETE setup
@@ -210,7 +217,10 @@ namespace TicketingSystem.UnitTests
         public async Task UpdateAsync_WhenInvoked_ShouldCallReplaceOneAsync()
         {
             var existingEntity = entities.FirstOrDefault();
-            var updatedEntity = fixture.Build<TEntity>().With(x => x.Id, existingEntity.Id).Create();
+            var updatedEntity = fixture.Build<TEntity>()
+                .With(x => x.Id, existingEntity.Id)
+                .With(x => x.Version, existingEntity.Version + 1)
+                .Create();
 
             await repository.UpdateAsync(existingEntity.Id, updatedEntity);
 
@@ -228,16 +238,16 @@ namespace TicketingSystem.UnitTests
         [Fact]
         public async Task UpdateAsync_Field_WhenInvoked_ShouldCallFindOneAndUpdateAsync()
         {
-            var id = entities.FirstOrDefault().Id;
+            var entity = entities.FirstOrDefault();
             Expression<Func<TEntity, string>> fieldExpression = x => x.Id;
 
-            await repository.UpdateAsync(id, fieldExpression, newValue);
+            await repository.UpdateAsync(entity.Id, fieldExpression, newValue, entity.Version);
 
             mongoCollectionMock.Verify(x =>
-                    x.FindOneAndUpdateAsync(
+                    x.UpdateOneAsync(
                         It.IsAny<FilterDefinition<TEntity>>(),
                         It.IsAny<UpdateDefinition<TEntity>>(),
-                        It.IsAny<FindOneAndUpdateOptions<TEntity>>(),
+                        It.IsAny<UpdateOptions>(),
                         It.IsAny<CancellationToken>()),
                 Times.Once);
 

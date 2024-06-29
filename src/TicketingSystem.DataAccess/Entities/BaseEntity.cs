@@ -8,5 +8,7 @@ namespace TicketingSystem.DataAccess.Entities
     {
         [BsonId]
         public string Id { get; set; } = Guid.NewGuid().ToString();
+
+        public long Version { get; set; }
     }
 }

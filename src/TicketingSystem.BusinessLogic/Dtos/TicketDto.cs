@@ -3,10 +3,8 @@ using TicketingSystem.Common.Enums;
 
 namespace TicketingSystem.BusinessLogic.Dtos
 {
-    public class TicketDto : IDto
+    public class TicketDto : BaseDto, IDto
     {
-        public string Id { get; set; }
-
         public string EventSeatId { get; set; }
 
         public string EventId { get; set; }

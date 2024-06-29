@@ -12,6 +12,7 @@ namespace TicketingSystem.WebApi.Controllers
     [ApiController]
     [Route("[controller]")]
     [BusinessLogicExceptionFilter]
+    [OutdatedVersionExceptionFilter]
     public class VenuesController(IVenueService venuesService)
         : ControllerBase
     {

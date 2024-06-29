@@ -6,7 +6,7 @@ namespace TicketingSystem.DataAccess.Factories
     {
         private readonly string _databaseName;
 
-        private readonly IMongoClient _client;
+        public readonly IMongoClient _client;
 
         public MongoDbFactory(string connectionString, string databaseName)
         {
@@ -16,6 +16,8 @@ namespace TicketingSystem.DataAccess.Factories
             _client = new MongoClient(settings);
             _databaseName = databaseName;
         }
+
+        public IMongoClient Client { get => _client; }
 
         public IMongoCollection<T> GetCollection<T>(string collectionNme)
         {
