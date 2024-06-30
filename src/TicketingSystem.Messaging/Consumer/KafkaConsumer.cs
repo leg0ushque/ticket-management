@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Serilog;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TicketingSystem.Messaging.Models.Models;
 using TicketingSystem.Messaging.Options;
@@ -25,7 +26,7 @@ namespace TicketingSystem.Messaging.Consumer
             _handler = handler;
         }
 
-        public void Listen()
+        public async Task ListenAsync(CancellationToken ct = default)
         {
             using var consumer = _consumerProvider.Consumer;
             consumer.Subscribe(_kafkaOptions.Value.Topic);
@@ -39,7 +40,7 @@ namespace TicketingSystem.Messaging.Consumer
 
                     _logger.Information("Consumed message with key {Key}", consumeResult.Message.Key);
 
-                    _handler.Handle(result.Value);
+                    await _handler.HandleAsync(result.Value, ct);
                 }
                 catch (Exception e)
                 {

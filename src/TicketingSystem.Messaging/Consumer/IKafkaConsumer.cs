@@ -1,7 +1,10 @@
-﻿namespace TicketingSystem.Messaging.Consumer
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace TicketingSystem.Messaging.Consumer
 {
     public interface IKafkaConsumer
     {
-        public void Listen();
+        public Task ListenAsync(CancellationToken ct = default);
     }
 }

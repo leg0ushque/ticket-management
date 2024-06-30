@@ -46,7 +46,7 @@ namespace TicketingSystem.WebApi
             builder.Services.AddEndpointsApiExplorer();
 
             builder.Services.AddOptions<KafkaOptions>()
-                .Bind(config.GetSection(KafkaOptions.ConfigurationSection));
+                .Bind(config.GetSection(KafkaOptions.ConfigurationKey));
 
             builder.Services.AddTransient<KafkaConfigurationProvider>();
             builder.Services.AddTransient<IProducerProvider, KafkaProducerProvider>();

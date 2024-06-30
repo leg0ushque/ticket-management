@@ -2,7 +2,7 @@
 {
     public class KafkaOptions
     {
-        public const string ConfigurationSection = "Kafka";
+        public const string ConfigurationKey = "Kafka";
 
         public string ClientId { get; set; }
 
