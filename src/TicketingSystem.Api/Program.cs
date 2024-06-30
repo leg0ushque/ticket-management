@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Serilog.Events;
 using System;
 using System.IO;
 using System.Reflection;
@@ -29,16 +30,11 @@ namespace TicketingSystem.WebApi
 
             var config = SetupConfiguration(env);
             builder.Services.AddSingleton<IConfiguration>(config);
-            builder.Services.AddOptions<CacheOptions>()
-                .Configure<IConfiguration>((settings, config) =>
-                {
-                    config.GetSection("CacheOptions").Bind(settings);
-                });
 
             var connectionString = config.GetConnectionString("connectionString");
             var databaseName = config.GetSection("databaseName").Value;
 
-            builder.Services.AddBusinessLogicServices(connectionString, databaseName);
+            builder.Services.AddBusinessLogicServices(config, connectionString, databaseName);
 
             builder.Services.AddSingleton(SetupMapper());
 
@@ -54,9 +50,21 @@ namespace TicketingSystem.WebApi
             builder.Services.AddTransient<IKafkaProducer, KafkaProducer>();
             builder.Services.AddTransient<IKafkaNotificationService, KafkaNotificationService>();
 
-            /* configure serilog here */
+            var loggerOutputTemplate =
+                "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
 
-            builder.Services.AddSerilog();
+            var configuredLogger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information).WriteTo.File(@"Logs\Info-{Date}.log", outputTemplate: loggerOutputTemplate))
+                .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Debug).WriteTo.File(@"Logs\Debug-{Date}.log", outputTemplate: loggerOutputTemplate))
+                .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Warning).WriteTo.File(@"Logs\Warning-{Date}.log", outputTemplate: loggerOutputTemplate))
+                .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Error).WriteTo.File(@"Logs\Error-{Date}.log", outputTemplate: loggerOutputTemplate))
+                .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Fatal).WriteTo.File(@"Logs\Fatal-{Date}.log", outputTemplate: loggerOutputTemplate))
+                .WriteTo.File(@"Logs\All-{Date}.log", outputTemplate: loggerOutputTemplate)
+                .CreateLogger();
+
+            builder.Services.AddSerilog(configuredLogger);
 
             builder.Services.AddSwaggerGen(config =>
             {

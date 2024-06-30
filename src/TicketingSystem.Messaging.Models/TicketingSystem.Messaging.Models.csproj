@@ -22,9 +22,9 @@
 	  <Folder Include="com\ticketingSystem\" />
 	</ItemGroup>
 
-	<Target Name="EnsureThatAvroToolsAreInstalled" BeforeTargets="GenerateModel">
-		<Exec Command="dotnet tool install --global Apache.Avro.Tools" ContinueOnError="true" />
-	</Target>
+	<!--Target Name="EnsureThatAvroToolsAreInstalled" BeforeTargets="GenerateModel">
+		<Exec Command="dotnet tool install - -global Apache.Avro.Tools" ContinueOnError="true" />
+	</Target-->
 	<Target Name="GenerateModel" BeforeTargets="BeforeBuild">
 		<ItemGroup>
 			<Topic Include="Avro/*.avsc" />

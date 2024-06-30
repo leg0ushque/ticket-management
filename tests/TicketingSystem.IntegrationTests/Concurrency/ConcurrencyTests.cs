@@ -57,8 +57,6 @@ namespace TicketingSystem.IntegrationTests.Concurrency
                 => firstPaymentSeats.Any(x => x == es.Id) && es.Id != bookedSeat.Id);
 
             notUpdatedSeats.All(s => s.State == EventSeatState.Available).Should().BeTrue();
-
-            await TearDown();
         }
 
         [Fact]
@@ -85,8 +83,6 @@ namespace TicketingSystem.IntegrationTests.Concurrency
 
             successfulRequests.Should().HaveCount(1);
             failedRequests.Should().HaveCount(requestsAmount - 1);
-
-            await TearDown();
         }
 
         private async Task ExecuteEndpointCall(string cartId)
@@ -202,12 +198,6 @@ namespace TicketingSystem.IntegrationTests.Concurrency
             PaymentsIds = await CreateEntities(_dbFixture.PaymentRepositoryInstance, paymentsToCreate, ct);
 
             return paymentsToCreate.ToList();
-        }
-
-        private async Task TearDown(CancellationToken ct = default)
-        {
-            await DeleteGeneratedEntities(ct);
-            await RemoveEntities(_dbFixture.PaymentRepositoryInstance, PaymentsIds);
         }
     }
 }

@@ -20,7 +20,7 @@ using TicketingSystem.WebApi.Controllers;
 
 namespace TicketingSystem.IntegrationTests
 {
-    public class FixtureTestsBase
+    public class FixtureTestsBase : IDisposable
     {
         public readonly string CartId = Guid.NewGuid().ToString();
 
@@ -85,19 +85,19 @@ namespace TicketingSystem.IntegrationTests
         public PaymentsController PaymentsController { get; set; }
         public OrdersController OrdersController { get; set; }
 
-        public List<string> EventsIds { get; set; }
-        public List<string> EventSectionsIds { get; set; }
-        public List<string> PaymentsIds { get; set; }
-        public List<string> TicketsIds { get; set; }
-        public List<string> UsersIds { get; set; }
-        public List<string> VenuesIds { get; set; }
-        public List<string> SectionsIds { get; set; }
+        public List<string> EventsIds { get; set; } = new();
+        public List<string> EventSectionsIds { get; set; } = new();
+        public List<string> PaymentsIds { get; set; } = new();
+        public List<string> TicketsIds { get; set; } = new();
+        public List<string> UsersIds { get; set; } = new();
+        public List<string> VenuesIds { get; set; } = new();
+        public List<string> SectionsIds { get; set; } = new();
 
-        public Task DeleteGeneratedEntities(CancellationToken ct = default)
-        {
-            return RemoveEntities(_dbFixture.EventSectionRepositoryInstance, EventSectionsIds, ct)
-                .ContinueWith(x => RemoveEntities(_dbFixture.EventRepositoryInstance, EventsIds), ct);
-        }
+        //public Task DeleteGeneratedEntities(CancellationToken ct = default)
+        //{
+        //    return RemoveEntities(_dbFixture.EventSectionRepositoryInstance, EventSectionsIds, ct)
+        //        .ContinueWith(x => RemoveEntities(_dbFixture.EventRepositoryInstance, EventsIds), ct);
+        //}
 
         public async Task GenerateEntities(CancellationToken ct = default)
         {
@@ -150,6 +150,13 @@ namespace TicketingSystem.IntegrationTests
             {
                 await repository.DeleteAsync(id, ct);
             }
+        }
+
+        public void Dispose()
+        {
+            RemoveEntities(_dbFixture.EventSectionRepositoryInstance, EventSectionsIds).GetAwaiter().GetResult();
+            RemoveEntities(_dbFixture.EventRepositoryInstance, EventsIds).GetAwaiter().GetResult();
+            RemoveEntities(_dbFixture.PaymentRepositoryInstance, PaymentsIds).GetAwaiter().GetResult();
         }
     }
 }
