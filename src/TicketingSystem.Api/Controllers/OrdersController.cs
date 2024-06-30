@@ -17,6 +17,7 @@ namespace TicketingSystem.WebApi.Controllers
     [ApiController]
     [Route("[controller]")]
     [BusinessLogicExceptionFilter]
+    [OutdatedVersionExceptionFilter]
     public class OrdersController(
         IPaymentService paymentService,
         IEventSectionService eventSectionService)
@@ -111,10 +112,26 @@ namespace TicketingSystem.WebApi.Controllers
             // Events with sections containing a list of seats to update
             var groupedCartItems = _paymentService.GetPaymentEventSeats(payment);
 
-            foreach (var item in groupedCartItems)
-            {
-                await _eventSectionService.BookSeatsOfEvent(item.EventId, item.SectionSeats);
-            }
+            await _eventSectionService.BookSeatsOfEventAsync(groupedCartItems);
+
+            return Ok(payment.Id);
+        }
+
+        /// <summary>
+        /// Moves all the seats in the cart to a booked state. Returns the ID of the related Payment
+        /// </summary>
+        [HttpPut]
+        [Route("carts/{cartId}/book-concurrently")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> BookSeatsInCartConcurrently([FromRoute] string cartId)
+        {
+            var payment = await _paymentService.GetIncompletePayment(cartId);
+
+            // Events with sections containing a list of seats to update
+            var groupedCartItems = _paymentService.GetPaymentEventSeats(payment);
+
+            await _eventSectionService.ExecuteBookingTransactionAsync(groupedCartItems);
 
             return Ok(payment.Id);
         }

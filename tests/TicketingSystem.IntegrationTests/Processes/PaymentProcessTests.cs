@@ -14,7 +14,6 @@ using Xunit;
 
 namespace TicketingSystem.IntegrationTests.Processes
 {
-
     public class PaymentProcessTests(DatabaseFixture fixture) : FixtureTestsBase(fixture), IClassFixture<DatabaseFixture>
     {
         [Theory]

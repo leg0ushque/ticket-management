@@ -102,7 +102,7 @@ namespace TicketingSystem.BusinessLogic.Services
                 updatedCartItems = [.. _mapper.Map<CartItem[]>(payment.CartItems), newItem];
             }
 
-            await _repository.UpdateAsync(payment.Id, p => p.CartItems, updatedCartItems, cancellationToken);
+            await _repository.UpdateAsync(payment.Id, p => p.CartItems, updatedCartItems, payment.Version, cancellationToken);
 
             return new PaymentStateModel
             {
@@ -123,7 +123,7 @@ namespace TicketingSystem.BusinessLogic.Services
 
             var updatedCartItems = payment.CartItems.Where(ci => ci.EventSeatId != seatId).ToArray();
 
-            await _repository.UpdateAsync(payment.Id, p => p.CartItems, _mapper.Map<CartItem[]>(updatedCartItems), cancellationToken);
+            await _repository.UpdateAsync(payment.Id, p => p.CartItems, _mapper.Map<CartItem[]>(updatedCartItems), payment.Version, cancellationToken);
         }
     }
 }

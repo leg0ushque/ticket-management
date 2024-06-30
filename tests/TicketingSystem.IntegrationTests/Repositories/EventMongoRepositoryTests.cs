@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using FluentAssertions;
+using System;
 using System.Threading.Tasks;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
@@ -63,12 +64,15 @@ namespace TicketingSystem.IntegrationTests.Repositories
             // Arrange
             await _repository.CreateAsync(_testEntity);
 
+            var newName = Guid.NewGuid().ToString();
+            _testEntity.Name = newName;
+
             // Act
             await _repository.UpdateAsync(_testEntity.Id, _testEntity);
 
             // Assert
             var savedEntity = await _repository.GetByIdAsync(_testEntity.Id);
-            savedEntity.Name.Should().BeEquivalentTo(_testEntity.Name);
+            savedEntity.Name.Should().BeEquivalentTo(newName);
 
             await TearDown();
         }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Services;
+using TicketingSystem.WebApi.Filters;
 
 namespace TicketingSystem.WebApi.Controllers
 {
@@ -10,6 +11,7 @@ namespace TicketingSystem.WebApi.Controllers
     /// </summary>
     [ApiController]
     [Route("[controller]")]
+    [OutdatedVersionExceptionFilter]
     public class EventsController(
         IEventService eventService,
         IEventSectionService eventSectionService) : ControllerBase

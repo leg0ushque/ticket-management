@@ -10,7 +10,7 @@ namespace TicketingSystem.IntegrationTests
     public class DatabaseFixture
     {
         public IMongoRepository<Event> EventRepositoryInstance { get; private set; }
-        public IMongoRepository<EventSection> EventSectionRepositoryInstance { get; private set; }
+        public IEventSectionRepository EventSectionRepositoryInstance { get; private set; }
         public IMongoRepository<Payment> PaymentRepositoryInstance { get; private set; }
         public IMongoRepository<Ticket> TicketRepositoryInstance { get; private set; }
         public IMongoRepository<User> UserRepositoryInstance { get; private set; }

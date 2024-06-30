@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using TicketingSystem.Common.Exceptions;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Factories;
 
@@ -12,14 +13,21 @@ namespace TicketingSystem.DataAccess.Repositories
     public abstract class GenericMongoRepository<TEntity> : IMongoRepository<TEntity>
         where TEntity : class, IHasId
     {
+        public const int DefaultVersion = 1;
+        public const int NoItems = 0;
+
         public abstract string _collectionName { get; }
 
+        protected readonly IMongoClient _client;
         protected readonly IMongoCollection<TEntity> _collection;
 
         protected GenericMongoRepository(IMongoDbFactory mongoDbFactory)
         {
+            _client = mongoDbFactory.Client;
             _collection = mongoDbFactory.GetCollection<TEntity>(_collectionName);
         }
+
+        public IMongoClient Client { get => _client; }
 
         public async Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
@@ -56,21 +64,43 @@ namespace TicketingSystem.DataAccess.Repositories
         public Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
             entity.Id = Guid.NewGuid().ToString();
+            entity.Version = 1;
 
             return _collection.InsertOneAsync(entity, new InsertOneOptions(), cancellationToken);
         }
 
-        public Task UpdateAsync(string id, TEntity entity, CancellationToken cancellationToken = default)
+        public async Task UpdateAsync(string id, TEntity entity, CancellationToken cancellationToken = default)
         {
-            return _collection.ReplaceOneAsync(Builders<TEntity>.Filter.Eq("_id", id), entity,
+            var version = entity.Version;
+            var filter = Builders<TEntity>.Filter.Where(e => e.Id == id && e.Version == version);
+
+            entity.Version++;
+
+            var result = await _collection.ReplaceOneAsync(filter, entity,
                 cancellationToken: cancellationToken);
+
+            if (result.ModifiedCount == NoItems)
+            {
+                throw new OutdatedVersionException();
+            }
         }
 
-        public Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, CancellationToken cancellationToken = default)
+        public async Task UpdateAsync<TField>(string id, Expression<Func<TEntity, TField>> field, TField newValue, long version,
+            CancellationToken cancellationToken = default)
         {
-            return _collection.FindOneAndUpdateAsync(Builders<TEntity>.Filter.Eq("_id", id),
-                    Builders<TEntity>.Update.Set(field, newValue),
+            var filter = Builders<TEntity>.Filter.Where(e => e.Id == id && e.Version == version);
+
+            var update = Builders<TEntity>.Update
+                    .Set(field, newValue)
+                    .Inc(x => x.Version, 1);
+
+            var result = await _collection.UpdateOneAsync(filter, update,
                 cancellationToken: cancellationToken);
+
+            if (result.ModifiedCount == NoItems)
+            {
+                throw new OutdatedVersionException();
+            }
         }
 
         public Task DeleteAsync(string id, CancellationToken cancellationToken = default)
