@@ -10,11 +10,9 @@ namespace TicketingSystem.BusinessLogic
 {
     public static class DiExtension
     {
-        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services, IConfiguration config,
+        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services,
             string connectionString, string databaseName)
         {
-            services.AddOptions<CacheOptions>().Bind(config.GetSection(CacheOptions.ConfigurationKey));
-
             return services.AddDataAccessServices(connectionString, databaseName)
                 .AddMemoryCache()
                 .RegisterServices();

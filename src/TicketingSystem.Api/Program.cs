@@ -34,7 +34,10 @@ namespace TicketingSystem.WebApi
             var connectionString = config.GetConnectionString("connectionString");
             var databaseName = config.GetSection("databaseName").Value;
 
-            builder.Services.AddBusinessLogicServices(config, connectionString, databaseName);
+            builder.Services.AddOptions<CacheOptions>()
+                .Bind(config.GetSection(CacheOptions.ConfigurationKey));
+
+            builder.Services.AddBusinessLogicServices(connectionString, databaseName);
 
             builder.Services.AddSingleton(SetupMapper());
 

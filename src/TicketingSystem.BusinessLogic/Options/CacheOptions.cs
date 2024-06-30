@@ -1,11 +1,11 @@
 ﻿namespace TicketingSystem.BusinessLogic.Options
 {
-    public class CacheOptions(int responseCacheDuration = 60, double slidingExpiration = 1.0)
+    public class CacheOptions
     {
-        public static readonly string ConfigurationKey = "CacheOptions";
+        public static readonly string ConfigurationKey = "Cache";
 
-        public int ResponseCacheDuration { get; set; } = responseCacheDuration;
+        public int ResponseCacheDuration { get; set; } = 60;
 
-        public double SlidingExpiration { get; set; } = slidingExpiration;
+        public double SlidingExpiration { get; set; } = 1.0;
     }
 }
