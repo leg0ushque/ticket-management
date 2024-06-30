@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
 using TicketingSystem.Messaging;
 using TicketingSystem.NotificationHandlerApp.EmailProviders;
