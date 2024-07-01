@@ -59,7 +59,7 @@ namespace TicketingSystem.NotificationHandlerApp
 
             Console.WriteLine(outputMessage);
 
-            await _notificationService.UpdateNotificationStatus(message.TrackingId, notificationStatus);
+            await _notificationService.UpdateNotificationStatus(message.TrackingId, notificationStatus, ct);
 
             return response;
         }
