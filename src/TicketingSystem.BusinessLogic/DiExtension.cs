@@ -1,6 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Confluent.Kafka;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using TicketingSystem.BusinessLogic.Options;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.DataAccess;
+using TicketingSystem.Messaging.Options;
 
 namespace TicketingSystem.BusinessLogic
 {
@@ -9,8 +13,7 @@ namespace TicketingSystem.BusinessLogic
         public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services,
             string connectionString, string databaseName)
         {
-            return services
-                .AddDataAccessServices(connectionString, databaseName)
+            return services.AddDataAccessServices(connectionString, databaseName)
                 .AddMemoryCache()
                 .RegisterServices();
         }
@@ -24,7 +27,8 @@ namespace TicketingSystem.BusinessLogic
                 .AddTransient<ISectionService, SectionService>()
                 .AddTransient<ITicketService, TicketService>()
                 .AddTransient<IUserService, UserService>()
-                .AddTransient<IVenueService, VenueService>();
+                .AddTransient<IVenueService, VenueService>()
+                .AddTransient<INotificationService, NotificationService>();
         }
     }
 }

@@ -1,0 +1,15 @@
+{
+  "ConnectionStrings": {
+    "connectionString": "<connection string>"
+  },
+  "MailJet": {
+    "AuthTokenValue": "AUTH_TOKEN",
+    "ApiBaseAddress": "https://api.address.here"
+  },
+  "databaseName": "TicketingSystemDb",
+  "Kafka": {
+    "BootstrapServer": "localhost:9092",
+    "ClientId": "processing",
+    "Topic": "ticketing-emails"
+  }
+}

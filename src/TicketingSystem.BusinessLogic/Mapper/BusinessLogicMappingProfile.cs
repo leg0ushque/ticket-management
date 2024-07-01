@@ -18,6 +18,7 @@ namespace TicketingSystem.BusinessLogic.Mapper
             CreateMap<Ticket, TicketDto>().ReverseMap();
             CreateMap<User, UserDto>().ReverseMap();
             CreateMap<Venue, VenueDto>().ReverseMap();
+            CreateMap<Notification, NotificationDto>().ReverseMap();
         }
     }
 }

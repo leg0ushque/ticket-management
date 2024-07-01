@@ -19,10 +19,12 @@ namespace TicketingSystem.WebApi.Controllers
     [BusinessLogicExceptionFilter]
     [OutdatedVersionExceptionFilter]
     public class OrdersController(
+        IKafkaNotificationService kafkaNotificationService,
         IPaymentService paymentService,
         IEventSectionService eventSectionService)
         : ControllerBase
     {
+        private readonly IKafkaNotificationService _kafkaNotificationService = kafkaNotificationService;
         private readonly IPaymentService _paymentService = paymentService;
         private readonly IEventSectionService _eventSectionService = eventSectionService;
 
@@ -114,6 +116,8 @@ namespace TicketingSystem.WebApi.Controllers
 
             await _eventSectionService.BookSeatsOfEventAsync(groupedCartItems);
 
+            await _kafkaNotificationService.CreateSeatsBookedNotification(payment, groupedCartItems);
+
             return Ok(payment.Id);
         }
 
@@ -132,6 +136,8 @@ namespace TicketingSystem.WebApi.Controllers
             var groupedCartItems = _paymentService.GetPaymentEventSeats(payment);
 
             await _eventSectionService.ExecuteBookingTransactionAsync(groupedCartItems);
+
+            await _kafkaNotificationService.CreateSeatsBookedNotification(payment, groupedCartItems);
 
             return Ok(payment.Id);
         }

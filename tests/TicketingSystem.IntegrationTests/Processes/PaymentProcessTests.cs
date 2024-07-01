@@ -76,6 +76,7 @@ namespace TicketingSystem.IntegrationTests.Processes
 
             var bookSeatsResponse = await OrdersController.BookSeatsInCart(CartId) as OkObjectResult;
             var paymentId = bookSeatsResponse.Value as string;
+            PaymentsIds.Add(paymentId);
 
             // (Extra step) Verify the seats are booked
 
@@ -156,11 +157,6 @@ namespace TicketingSystem.IntegrationTests.Processes
             paymentResponse = await PaymentsController.GetPaymentStatus(paymentId) as OkObjectResult;
             var paymentUpdatedState = paymentResponse.Value as PaymentState?;
             paymentUpdatedState.Should().Be(updatedPaymentState);
-
-            // Teardown & cleanup
-
-            await TearDown();
-            await _paymentService.DeleteAsync(paymentId);
         }
 
         [Theory]
@@ -200,20 +196,11 @@ namespace TicketingSystem.IntegrationTests.Processes
 
             firstSeatAddResultValue.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             firstSeatAddResultValue.Value.Should().NotBeNull();
-
-            // Teardown & cleanup
-
-            await TearDown();
         }
 
         private Task Setup(CancellationToken ct = default)
         {
             return GenerateEntities(ct);
-        }
-
-        private Task TearDown(CancellationToken ct = default)
-        {
-            return DeleteGeneratedEntities(ct);
         }
 
         private async Task<List<EventSectionDto>> GetEventSections(string eventId, string sectionId = "")

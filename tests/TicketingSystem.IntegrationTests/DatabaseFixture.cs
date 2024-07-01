@@ -16,6 +16,7 @@ namespace TicketingSystem.IntegrationTests
         public IMongoRepository<User> UserRepositoryInstance { get; private set; }
         public IMongoRepository<Venue> VenueRepositoryInstance { get; private set; }
         public IMongoRepository<Section> SectionRepositoryInstance { get; private set; }
+        public IMongoRepository<Notification> NotificationRepositoryInstance { get; private set; }
 
         public DatabaseFixture()
         {
@@ -36,6 +37,7 @@ namespace TicketingSystem.IntegrationTests
             UserRepositoryInstance = new UserRepository(mongoDbFactory);
             VenueRepositoryInstance = new VenueRepository(mongoDbFactory);
             SectionRepositoryInstance = new SectionRepository(mongoDbFactory);
+            NotificationRepositoryInstance = new NotificationRepository(mongoDbFactory);
         }
     }
 }
