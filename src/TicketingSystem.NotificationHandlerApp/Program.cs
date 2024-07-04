@@ -52,10 +52,9 @@ namespace TicketingSystem.NotificationHandlerApp
 
                 services.AddHttpClient<IMailHttpClient, MailJetHttpClient>(c =>
                 {
-                    c.BaseAddress = new Uri(config["MailJet:ApiBaseAddress"]);
+                    c.BaseAddress = new Uri("https://api.mailjet.com/v3");
                 });
 
-                services.AddHttpClient<IMailHttpClient, MailJetHttpClient>();
                 services.AddSingleton<IEmailProvider, MailJetEmailProvider>();
 
 
