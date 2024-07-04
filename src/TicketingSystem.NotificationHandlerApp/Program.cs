@@ -13,13 +13,18 @@ using TicketingSystem.Messaging.Producer;
 using TicketingSystem.NotificationHandlerApp.EmailProviders;
 using TicketingSystem.NotificationHandlerApp.HttpClients;
 using TicketingSystem.NotificationHandlerApp.Options;
+using TicketingSystem.Messaging.Consumer;
+using TicketingSystem.BusinessLogic.Services;
+using TicketingSystem.DataAccess.Entities;
+using TicketingSystem.DataAccess.Repositories;
+using TicketingSystem.DataAccess.Factories;
+using Serilog;
+using Serilog.Events;
 
 namespace TicketingSystem.NotificationHandlerApp
 {
     public static class Program
     {
-        private static IConfiguration _configuration;
-
         public static void Main(string[] args)
         {
             var app = CreateHostBuilder(args).Build();
@@ -57,17 +62,33 @@ namespace TicketingSystem.NotificationHandlerApp
                 var connectionString = config.GetConnectionString("connectionString");
                 var databaseName = config.GetSection("databaseName").Value;
 
-                services.AddBusinessLogicServices(connectionString, databaseName);
+                services.AddSingleton<IMongoDbFactory>(new MongoDbFactory(connectionString, databaseName));
+                services.AddTransient<IMongoRepository<Notification>, NotificationRepository>();
+                services.AddTransient<INotificationService, NotificationService>();
 
                 services.AddOptions<KafkaOptions>()
-                    .Bind(_configuration.GetSection(KafkaOptions.ConfigurationKey));
+                    .Bind(config.GetSection(KafkaOptions.ConfigurationKey));
 
                 services.AddTransient<KafkaConfigurationProvider>();
-                services.AddTransient<IProducerProvider, KafkaProducerProvider>();
-                services.AddTransient<IKafkaProducer, KafkaProducer>();
+                services.AddTransient<IConsumerProvider, KafkaConsumerProvider>();
+                services.AddTransient<IKafkaConsumer, KafkaConsumer>();
                 services.AddTransient<IMessageHandler, MessageHandler>();
 
                 services.AddHostedService<KafkaConsumingHostedService>();
+
+                var loggerOutputTemplate =
+                    "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+
+                services.AddSerilog(new LoggerConfiguration()
+                    .MinimumLevel.Debug()
+                    .WriteTo.Console()
+                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information).WriteTo.RollingFile(@"Logs\Info-{Date}.log", outputTemplate: loggerOutputTemplate))
+                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Debug).WriteTo.RollingFile(@"Logs\Debug-{Date}.log", outputTemplate: loggerOutputTemplate))
+                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Warning).WriteTo.RollingFile(@"Logs\Warning-{Date}.log", outputTemplate: loggerOutputTemplate))
+                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Error).WriteTo.RollingFile(@"Logs\Error-{Date}.log", outputTemplate: loggerOutputTemplate))
+                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Fatal).WriteTo.RollingFile(@"Logs\Fatal-{Date}.log", outputTemplate: loggerOutputTemplate))
+                    .WriteTo.RollingFile(@"Logs\All-{Date}.log", outputTemplate: loggerOutputTemplate)
+                    .CreateLogger());
             });
 
             return hostBuilder;

@@ -19,17 +19,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="com\ticketingSystem\" />
+	  <ProjectReference Include="..\TicketingSystem.Common\TicketingSystem.Common.csproj" />
 	</ItemGroup>
 
 	<!--Target Name="EnsureThatAvroToolsAreInstalled" BeforeTargets="GenerateModel">
 		<Exec Command="dotnet tool install - -global Apache.Avro.Tools" ContinueOnError="true" />
-	</Target-->
+	</Target>
 	<Target Name="GenerateModel" BeforeTargets="BeforeBuild">
 		<ItemGroup>
 			<Topic Include="Avro/*.avsc" />
 		</ItemGroup>
 		<Exec Command="avrogen -s %(Topic.Identity) ." />
-	</Target>
+	</Target-->
 
 </Project>

@@ -1,5 +1,4 @@
-﻿using com.ticketingSystem;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +11,8 @@ using TicketingSystem.Messaging.Producer;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
-    public class KafkaNotificationService(IKafkaProducer kafkaProducer, INotificationService notificationService, IEventService eventService)
+    public class KafkaNotificationService(IKafkaProducer kafkaProducer,
+        INotificationService notificationService, IEventService eventService)
         : IKafkaNotificationService
     {
         private readonly IKafkaProducer _producer = kafkaProducer;
@@ -61,7 +61,7 @@ namespace TicketingSystem.BusinessLogic.Services
                     Timestamp = DateTime.Now,
                     CustomerEmail = "hww89115@doolk.com",
                     CustomerName = "Ivanov I.I.",
-                    Operation = (int)operation,
+                    Operation = operation,
                     OrderAmount = seatsAmount,
                     OrderSummary = $"{info}\n" +
                                    $"Total cost: {payment.CartItems.Sum(ci => ci.Price)},"

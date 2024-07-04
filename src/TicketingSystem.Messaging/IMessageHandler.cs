@@ -1,6 +1,6 @@
-﻿using com.ticketingSystem;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using TicketingSystem.Messaging.Models.Models;
 
 namespace TicketingSystem.Messaging
 {

@@ -1,6 +1,4 @@
-﻿using com.ticketingSystem;
-
-namespace TicketingSystem.Messaging.Models.Models
+﻿namespace TicketingSystem.Messaging.Models.Models
 {
     public class Message
     {

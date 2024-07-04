@@ -1,9 +1,6 @@
-﻿using AutoMapper;
-using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Exceptions;
 using TicketingSystem.Common.Enums;
 using TicketingSystem.DataAccess.Entities;
@@ -11,11 +8,9 @@ using TicketingSystem.DataAccess.Repositories;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
-    public class NotificationService : GenericEntityService<Notification, NotificationDto>, INotificationService
+    public class NotificationService(IMongoRepository<Notification> repository) : INotificationService
     {
-        public NotificationService(IMongoRepository<Notification> repository, IMapper mapper)
-            : base(repository, mapper)
-        { }
+        private readonly IMongoRepository<Notification> _repository = repository;
 
         public async Task<string> CreateNotification(string paymentId, CancellationToken ct = default)
         {

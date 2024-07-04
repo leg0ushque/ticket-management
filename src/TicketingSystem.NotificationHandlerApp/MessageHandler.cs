@@ -1,5 +1,4 @@
-﻿using com.ticketingSystem;
-using Polly;
+﻿using Polly;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -8,6 +7,7 @@ using System.Threading.Tasks;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
 using TicketingSystem.Messaging;
+using TicketingSystem.Messaging.Models.Models;
 using TicketingSystem.NotificationHandlerApp.EmailProviders;
 using TicketingSystem.NotificationHandlerApp.Models;
 
@@ -42,7 +42,7 @@ namespace TicketingSystem.NotificationHandlerApp
             {
                 FromEmail = "donotreply@ticketingsyst.em",
                 FromName = "Ticketing System Auto Notification",
-                Subject = Subjects[(OperationType)message.Operation],
+                Subject = Subjects[message.Operation],
                 TextPart = message.OrderSummary,
                 Recipients = [new EmailRecipientModel { Email = message.CustomerEmail }]
             };

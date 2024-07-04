@@ -60,7 +60,7 @@ namespace TicketingSystem.IntegrationTests
             _venueService = new VenueService(_dbFixture.VenueRepositoryInstance,
                 _dbFixture.SectionRepositoryInstance, _mapper);
             _sectionService = new SectionService(_dbFixture.SectionRepositoryInstance, _mapper);
-            _notificationService = new NotificationService(_dbFixture.NotificationRepositoryInstance, _mapper);
+            _notificationService = new NotificationService(_dbFixture.NotificationRepositoryInstance);
 
             var kafkaOptions = Options.Create<KafkaOptions>(
                 new KafkaOptions

@@ -1,5 +1,4 @@
-﻿using com.ticketingSystem;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Threading.Tasks;

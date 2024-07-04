@@ -6,7 +6,7 @@ using TicketingSystem.DataAccess.Entities;
 
 namespace TicketingSystem.BusinessLogic.Services
 {
-    public interface INotificationService : IService<Notification, NotificationDto>
+    public interface INotificationService
     {
         public Task<string> CreateNotification(string paymentId, CancellationToken ct = default);
 

@@ -1,10 +1,6 @@
-﻿using Confluent.Kafka;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using TicketingSystem.BusinessLogic.Options;
+﻿using Microsoft.Extensions.DependencyInjection;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.DataAccess;
-using TicketingSystem.Messaging.Options;
 
 namespace TicketingSystem.BusinessLogic
 {

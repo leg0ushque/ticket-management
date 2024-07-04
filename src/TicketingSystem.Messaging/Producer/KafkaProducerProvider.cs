@@ -1,6 +1,6 @@
-﻿using com.ticketingSystem;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Confluent.SchemaRegistry.Serdes;
+using TicketingSystem.Messaging.Models.Models;
 
 namespace TicketingSystem.Messaging.Producer
 {
@@ -12,11 +12,6 @@ namespace TicketingSystem.Messaging.Producer
 
         public KafkaProducerProvider(KafkaConfigurationProvider config)
         {
-            var avroSerializerConfig = new AvroSerializerConfig
-            {
-                BufferBytes = 1024
-            };
-
             Producer = new ProducerBuilder<string, MessageValue>(config.ProducerConfiguration)
                 .SetKeySerializer(new NewtonsoftSerializer<string>())
                 .SetValueSerializer(new NewtonsoftSerializer<MessageValue>())

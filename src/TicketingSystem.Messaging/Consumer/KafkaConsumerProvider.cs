@@ -1,5 +1,5 @@
-﻿using com.ticketingSystem;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
+using TicketingSystem.Messaging.Models.Models;
 
 namespace TicketingSystem.Messaging.Consumer
 {
