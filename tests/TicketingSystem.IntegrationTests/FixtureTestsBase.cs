@@ -13,11 +13,14 @@ using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
 using TicketingSystem.DataAccess.Entities;
 using TicketingSystem.DataAccess.Repositories;
+using TicketingSystem.Messaging;
+using TicketingSystem.Messaging.Options;
+using TicketingSystem.Messaging.Producer;
 using TicketingSystem.WebApi.Controllers;
 
 namespace TicketingSystem.IntegrationTests
 {
-    public class FixtureTestsBase
+    public class FixtureTestsBase : IDisposable
     {
         public readonly string CartId = Guid.NewGuid().ToString();
 
@@ -32,6 +35,7 @@ namespace TicketingSystem.IntegrationTests
         protected readonly IUserService _userService;
         protected readonly IVenueService _venueService;
         protected readonly ISectionService _sectionService;
+        protected readonly INotificationService _notificationService;
 
         public FixtureTestsBase(DatabaseFixture dbFixture)
         {
@@ -56,29 +60,44 @@ namespace TicketingSystem.IntegrationTests
             _venueService = new VenueService(_dbFixture.VenueRepositoryInstance,
                 _dbFixture.SectionRepositoryInstance, _mapper);
             _sectionService = new SectionService(_dbFixture.SectionRepositoryInstance, _mapper);
+            _notificationService = new NotificationService(_dbFixture.NotificationRepositoryInstance);
+
+            var kafkaOptions = Options.Create<KafkaOptions>(
+                new KafkaOptions
+                {
+                    BootstrapServer = "localhost:9092",
+                    ClientId = "processing",
+                    Topic = "ticketing-emails"
+                });
+
+            var kafkaConfigProvider = new KafkaConfigurationProvider(kafkaOptions);
+            var producerProvider = new KafkaProducerProvider(kafkaConfigProvider);
+            IKafkaProducer kafkaProducer = new KafkaProducer(producerProvider, kafkaOptions, null);
+
+            var kafkaNotificationService = new KafkaNotificationService(kafkaProducer, _notificationService, _eventService);
 
             EventsController = new EventsController(_eventService, _eventSectionService);
-            PaymentsController = new PaymentsController(_paymentService, _eventSectionService);
-            OrdersController = new OrdersController(_paymentService, _eventSectionService);
+            PaymentsController = new PaymentsController(kafkaNotificationService, _paymentService, _eventSectionService);
+            OrdersController = new OrdersController(kafkaNotificationService, _paymentService, _eventSectionService);
         }
 
         public EventsController EventsController { get; set; }
         public PaymentsController PaymentsController { get; set; }
         public OrdersController OrdersController { get; set; }
 
-        public List<string> EventsIds { get; set; }
-        public List<string> EventSectionsIds { get; set; }
-        public List<string> PaymentsIds { get; set; }
-        public List<string> TicketsIds { get; set; }
-        public List<string> UsersIds { get; set; }
-        public List<string> VenuesIds { get; set; }
-        public List<string> SectionsIds { get; set; }
+        public List<string> EventsIds { get; set; } = new();
+        public List<string> EventSectionsIds { get; set; } = new();
+        public List<string> PaymentsIds { get; set; } = new();
+        public List<string> TicketsIds { get; set; } = new();
+        public List<string> UsersIds { get; set; } = new();
+        public List<string> VenuesIds { get; set; } = new();
+        public List<string> SectionsIds { get; set; } = new();
 
-        public Task DeleteGeneratedEntities(CancellationToken ct = default)
-        {
-            return RemoveEntities(_dbFixture.EventSectionRepositoryInstance, EventSectionsIds, ct)
-                .ContinueWith(x => RemoveEntities(_dbFixture.EventRepositoryInstance, EventsIds), ct);
-        }
+        //public Task DeleteGeneratedEntities(CancellationToken ct = default)
+        //{
+        //    return RemoveEntities(_dbFixture.EventSectionRepositoryInstance, EventSectionsIds, ct)
+        //        .ContinueWith(x => RemoveEntities(_dbFixture.EventRepositoryInstance, EventsIds), ct);
+        //}
 
         public async Task GenerateEntities(CancellationToken ct = default)
         {
@@ -131,6 +150,13 @@ namespace TicketingSystem.IntegrationTests
             {
                 await repository.DeleteAsync(id, ct);
             }
+        }
+
+        public void Dispose()
+        {
+            RemoveEntities(_dbFixture.EventSectionRepositoryInstance, EventSectionsIds).GetAwaiter().GetResult();
+            RemoveEntities(_dbFixture.EventRepositoryInstance, EventsIds).GetAwaiter().GetResult();
+            RemoveEntities(_dbFixture.PaymentRepositoryInstance, PaymentsIds).GetAwaiter().GetResult();
         }
     }
 }

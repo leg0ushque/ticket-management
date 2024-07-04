@@ -24,12 +24,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\TicketingSystem.BusinessLogic\TicketingSystem.BusinessLogic.csproj" />
+		<ProjectReference Include="..\TicketingSystem.Messaging\TicketingSystem.Messaging.csproj" />
 	</ItemGroup>
 
 </Project>

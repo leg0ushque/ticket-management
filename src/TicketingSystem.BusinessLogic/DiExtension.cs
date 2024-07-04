@@ -9,8 +9,7 @@ namespace TicketingSystem.BusinessLogic
         public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services,
             string connectionString, string databaseName)
         {
-            return services
-                .AddDataAccessServices(connectionString, databaseName)
+            return services.AddDataAccessServices(connectionString, databaseName)
                 .AddMemoryCache()
                 .RegisterServices();
         }
@@ -24,7 +23,8 @@ namespace TicketingSystem.BusinessLogic
                 .AddTransient<ISectionService, SectionService>()
                 .AddTransient<ITicketService, TicketService>()
                 .AddTransient<IUserService, UserService>()
-                .AddTransient<IVenueService, VenueService>();
+                .AddTransient<IVenueService, VenueService>()
+                .AddTransient<INotificationService, NotificationService>();
         }
     }
 }

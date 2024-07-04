@@ -11,13 +11,15 @@ namespace TicketingSystem.DataAccess
         {
             return services
                 .AddSingleton<IMongoDbFactory>(new MongoDbFactory(connectionString, databaseName))
+                .AddTransient<IEventSectionRepository, EventSectionRepository>()
                 .AddTransient<IMongoRepository<Event>, EventRepository>()
                 .AddTransient<IMongoRepository<EventSection>, EventSectionRepository>()
                 .AddTransient<IMongoRepository<Payment>, PaymentRepository>()
                 .AddTransient<IMongoRepository<Ticket>, TicketRepository>()
                 .AddTransient<IMongoRepository<User>, UserRepository>()
                 .AddTransient<IMongoRepository<Venue>, VenueRepository>()
-                .AddTransient<IMongoRepository<Section>, SectionRepository>();
+                .AddTransient<IMongoRepository<Section>, SectionRepository>()
+                .AddTransient<IMongoRepository<Notification>, NotificationRepository>();
         }
     }
 }

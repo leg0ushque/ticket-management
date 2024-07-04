@@ -29,6 +29,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
 
         private readonly Mock<IPaymentService> _paymentServiceMock;
         private readonly Mock<IEventSectionService> _eventSectionServiceMock;
+        private readonly Mock<IKafkaNotificationService> _kafkaNotificationServiceMock;
 
         private readonly OrdersController _controller;
 
@@ -38,6 +39,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
 
             _paymentServiceMock = new Mock<IPaymentService>();
             _eventSectionServiceMock = new Mock<IEventSectionService>();
+            _kafkaNotificationServiceMock = new Mock<IKafkaNotificationService>();
 
             _payment = CreatePayment(_cartId);
             _eventSections = CreateEventSections();
@@ -45,7 +47,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
 
             SetupMocks();
 
-            _controller = new OrdersController(_paymentServiceMock.Object, _eventSectionServiceMock.Object);
+            _controller = new OrdersController(_kafkaNotificationServiceMock.Object, _paymentServiceMock.Object, _eventSectionServiceMock.Object);
         }
 
         [Fact]

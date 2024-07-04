@@ -7,6 +7,7 @@ using TicketingSystem.BusinessLogic.Dtos;
 using TicketingSystem.BusinessLogic.Models;
 using TicketingSystem.BusinessLogic.Services;
 using TicketingSystem.Common.Enums;
+using TicketingSystem.Messaging.Producer;
 using TicketingSystem.WebApi.Controllers;
 using Xunit;
 
@@ -16,6 +17,7 @@ namespace TicketingSystem.WebApi.Tests.Controllers
     {
         private readonly Fixture _fixture;
 
+        private readonly Mock<IKafkaNotificationService> _kafkaNotificationServiceMock;
         private readonly Mock<IPaymentService> _paymentServiceMock;
         private readonly Mock<IEventSectionService> _eventSectionServiceMock;
         private readonly PaymentsController _controller;
@@ -29,7 +31,9 @@ namespace TicketingSystem.WebApi.Tests.Controllers
             _paymentServiceMock = new Mock<IPaymentService>();
             _eventSectionServiceMock = new Mock<IEventSectionService>();
 
-            _controller = new PaymentsController(_paymentServiceMock.Object, _eventSectionServiceMock.Object);
+            _kafkaNotificationServiceMock = new Mock<IKafkaNotificationService>();
+
+            _controller = new PaymentsController(_kafkaNotificationServiceMock.Object, _paymentServiceMock.Object, _eventSectionServiceMock.Object);
 
             _payment = _fixture.Build<PaymentDto>()
                 .With(p => p.Id)

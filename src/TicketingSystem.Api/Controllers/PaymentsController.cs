@@ -14,10 +14,12 @@ namespace TicketingSystem.WebApi.Controllers
     [Route("[controller]")]
     [OutdatedVersionExceptionFilter]
     public class PaymentsController(
+        IKafkaNotificationService kafkaNotificationService,
         IPaymentService paymentService,
         IEventSectionService eventSectionService)
         : ControllerBase
     {
+        private readonly IKafkaNotificationService _kafkaNotificationService = kafkaNotificationService;
         private readonly IPaymentService _paymentService = paymentService;
 
         private readonly IEventSectionService _eventSectionService = eventSectionService;
@@ -82,6 +84,11 @@ namespace TicketingSystem.WebApi.Controllers
             }
 
             await _paymentService.UpdatePaymentState(payment.Id, paymentState);
+
+            if (paymentState == PaymentState.Completed)
+            {
+                await _kafkaNotificationService.CreatePaymentSucceededNotification(payment, groupedCartItems);
+            }
         }
     }
 }

@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TicketingSystem.Common\TicketingSystem.Common.csproj" />
     <ProjectReference Include="..\TicketingSystem.DataAccess\TicketingSystem.DataAccess.csproj" />
+    <ProjectReference Include="..\TicketingSystem.Messaging\TicketingSystem.Messaging.csproj" />
   </ItemGroup>
 
 </Project>
